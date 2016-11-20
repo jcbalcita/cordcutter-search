@@ -55,7 +55,7 @@ I declare a `background.js` file that contains the code for creating and firing 
 
 #### Context Menus
 
-Furthermore, I plan to create the appropriate context menus within `background.js` in the following manner:
+I plan to create the appropriate context menus within `background.js` in the following manner:
 
 ```javascript
 chrome.contextMenus.create({
