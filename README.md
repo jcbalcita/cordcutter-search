@@ -4,14 +4,14 @@ A Chrome extension that allows users, via the GuideBox API, to find out if a sho
 
 ## MVP
 
-- [ ] Has clickable icon which opens `popup.html`, which contains a functional "search by title" form.
-- [ ] Can grab selected text from the page and fire off API requests to GuideBox via context menus.
-- [ ] Users can search by show or movie title and find out on which websites the show is available for streaming.
-- [ ] Users can check if a specific season of a show is available for streaming on the web.
+- [ ] Has clickable icon that opens `popup.html`, which in turn renders a functional "search by title" form.
+- [ ] Grabs selected text from the page and fires off API requests to GuideBox via context menus.
+- [ ] Allows users to search by show or movie title and find out on which websites the show is available for streaming.
+- [ ] Allows user to check if a specific season of a show is available for streaming.
 
 ### Bonus
 
-- [ ] Users can specify the platform (_i.e._, iOS, Android, and Web) for the stream search.
+- [ ] Users can specify the platform (_i.e._, iOS, Android, or Web) for the stream search.
 - [ ] Users can specify the service (_e.g._, Hulu, Netflix, _etc._) for the stream search.
 
 ## Features and Functionality
