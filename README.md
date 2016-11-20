@@ -1,6 +1,6 @@
 # Cordcutter Search
 
-A Chrome extension that allows users, via the GuideBox API, to find out if a show or movie is available for licensed streaming on the web.
+A Chrome extension that allows users, via the [GuideBox API](http://www.guidebox.com), to find out if a show or movie is available for licensed streaming on the web.
 
 ## MVP
 
