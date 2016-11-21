@@ -81,12 +81,12 @@ chrome.contextMenus.create({
 
 ### Day 1
 - Document the URL structure for all API calls to GuideBox that my extension will need.
-  + Search by show title
-  + Search by movie title
-  + Request information on show by ID
-  + Request information on movie by ID
-  + Request information on specific season of a show
-- Declare an icon for my extension, get the icon to appear and open popup.html when clicked on.
+  + Search by show title ✔️
+  + Search by movie title ✔️
+  + Request information on show by ID ✔️
+  + Request information on movie by ID ✔️
+  + Request information on specific season of a show ✔️
+- Declare an icon for my extension, get the icon to appear and open popup.html when clicked on.  ✔️
 
 ### Day 2
 - Write the `handleClick` functions for the context menu items, and make sure fire off functional API calls by console logging the results.
