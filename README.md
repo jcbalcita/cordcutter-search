@@ -19,7 +19,7 @@ A Chrome extension that allows users, via the [GuideBox API](http://www.guidebox
 
 Cordcutter Search provides its users with an easy, convenient way to find out if a show is available for streaming.
 
-There are two ways for a user to get stream info regarding a movie or TV show.  
+There are two ways a user will be able to get stream info regarding a movie or TV show:
 - Selecting the text title on the webpage, right-clicking, and clicking on the appropriate option, which fires off the search.
 - Clicking on the extension's icon, which opens up a tab containing an HTML form in which the user can manually type in the title by which to search.
 
