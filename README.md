@@ -12,7 +12,7 @@ A Chrome extension that allows users, via the [GuideBox API](http://www.guidebox
 ### Bonus
 
 - [ ] Users can specify the platform (_i.e._, iOS, Android, or Web) for the stream search.
-- [ ] Users can specify the service (_e.g._, Hulu, Netflix, _etc._) for the stream search.
+- [ ] Users can specify the service (_e.g._, Hulu, Netflix) for the stream search.
 - [ ] Users can view _n_ number of old searches and bookmarked shows/movies.
 
 ## Features and Functionality
