@@ -1,19 +1,17 @@
 chrome.contextMenus.create({
- title: "Search by SHOW title",
- contexts:["selection"],
- onclick: searchShow
+  id: "search-show",
+  title: "Search by SHOW title",
+  contexts:["selection"],
+  onclick: function(e) {
+    console.log(encodeURIComponent(e.selectionText));
+  }
 });
 
 chrome.contextMenus.create({
- title: "Search by MOVIE title",
- contexts:["selection"],
- onclick: searchMovie
+  id: "search-movie",
+  title: "Search by MOVIE title",
+  contexts:["selection"],
+  onclick: function(e) {
+   console.log(encodeURIComponent(e.selectionText));
+  }
 });
-
-const searchShow = e => {
-  
-}
-
-const searchMovie= e => {
-
-}

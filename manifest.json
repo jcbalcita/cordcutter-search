@@ -5,16 +5,21 @@
   "description": "For cordcutters who constantly ask - 'where can I stream it?'",
   "version": "0.1",
   "background": {
-    "scripts": ["background.js"]
+    "scripts": ["background.js", "cordcutter.js"]
   },
   "browser_action": {
-    "default_icon": "cordcutter.png",
-    "default_title": "Cordcutter Search"
+    "default_icon": "assets/icon128.png",
+    "default_title": "Cordcutter Search",
+    "default_popup": "popup.html"
+  },
+  "icons": { "16": "assets/icon16.png",
+             "48": "assets/icon48.png",
+             "128": "assets/icon128.png"
   },
   "permissions": [
     "activeTab",
     "contextMenus",
     "storage",
-    "http://*.guidebox.com"
+    "http://api.guidebox.com/*"
   ]
 }
