@@ -1,6 +1,7 @@
 chrome.runtime.sendMessage({ action: 'getResults' }, function(response) {
-  const result = document.getElementById("search-results");
-  result.innerHTML = response.source;
+  if (response.type === "show") {
+    searchForShow(response.source);
+  }
 });
 
 // Search by show title
@@ -17,7 +18,10 @@ function searchForShow(searchString) {
   xhr.onload = function () {
     if (xhr.readyState === xhr.DONE) {
       if (xhr.status === 200) {
-        console.log(xhr.response);
+        const resultEl = document.getElementById("search-results");
+        const titles = xhr.response.results.map(show => show.title);
+        console.log(xhr.response.results);
+        resultEl.innerHTML = titles;
       }
     }
   };

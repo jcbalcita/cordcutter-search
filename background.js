@@ -1,4 +1,5 @@
 let searchString;
+let searchType;
 
 chrome.contextMenus.create({
   id: "search-show",
@@ -7,6 +8,7 @@ chrome.contextMenus.create({
   onclick: function(e) {
     chrome.tabs.create({ url: "results.html" });
     searchString = e.selectionText;
+    searchType = "show"
 }});
 
 chrome.contextMenus.create({
@@ -16,6 +18,7 @@ chrome.contextMenus.create({
   onclick: function(e) {
     cchrome.tabs.create({ url: "results.html" });
     searchString = e.selectionText;
+    searchType = "movie"
   }
 });
 
@@ -27,8 +30,7 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
     }
     // sent from newtab-contentscript, to get the source
     if(request.action === 'getResults') {
-
-        sendResponse({ source: searchString });
+      sendResponse({ source: searchString, type: searchType });
     }
 });
 
