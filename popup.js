@@ -1,8 +1,41 @@
 chrome.runtime.sendMessage({ action: 'getResults' }, function(response) {
   if (response.type === "show") {
     searchForShow(response.source);
+  } else if (response.type === "movie") {
+    searchForMovie(response.source);
   }
 });
+
+function processShowResults(results) {
+  if (results.length > 0) {
+    results.forEach(show => appendListItem(show));
+    console.log(results);
+  } else {
+    document.getElementById("results").innerHTML = "No results found."
+  }
+}
+
+function appendListItem(show) {
+  const resultEl = document.getElementById("initial-results-ul");
+  let listItem = document.createElement("li");
+  let image = document.createElement("img");
+  image.src = show.artwork_208x117;
+
+  listItem.className = "list-item";
+  listItem.dataset.id = show.id;
+  listItem.onclick = getShowById.bind(this, show.id);
+
+  listItem.appendChild(image);
+  listItem.appendChild(newSpan(show.title));
+
+  resultEl.appendChild(listItem);
+}
+
+function newSpan(item) {
+  const span = document.createElement("span");
+  span.innerHTML = item;
+  return span;
+}
 
 // Search by show title
 // ********************
@@ -18,10 +51,9 @@ function searchForShow(searchString) {
   xhr.onload = function () {
     if (xhr.readyState === xhr.DONE) {
       if (xhr.status === 200) {
-        const resultEl = document.getElementById("search-results");
-        const titles = xhr.response.results.map(show => show.title);
-        console.log(xhr.response.results);
-        resultEl.innerHTML = titles;
+        processShowResults(xhr.response.results);
+      } else {
+        document.getElementById("initial-results").innerHTML = "Loading..."
       }
     }
   };
@@ -42,8 +74,10 @@ function searchForMovie(searchString) {
   xhr.onload = function () {
     if (xhr.readyState === xhr.DONE) {
       if (xhr.status === 200) {
-        console.log(xhr.response);
-        // do moar stuff here
+        const resultEl = document.getElementById("search-results");
+        const titles = xhr.response.results.map(movie => `${movie.title}`);
+        console.log(xhr.response.results);
+        resultEl.innerHTML = titles;
       }
     }
   };

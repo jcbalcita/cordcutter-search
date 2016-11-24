@@ -16,7 +16,7 @@ chrome.contextMenus.create({
   title: "Search by MOVIE title",
   contexts:["selection"],
   onclick: function(e) {
-    cchrome.tabs.create({ url: "results.html" });
+    chrome.tabs.create({ url: "results.html" });
     searchString = e.selectionText;
     searchType = "movie"
   }
@@ -33,10 +33,3 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
       sendResponse({ source: searchString, type: searchType });
     }
 });
-
-
-//
-// function printResults(searchString) {
-//   const results = document.getElementById("search-results");
-//   results.innerHTML = searchString;
-// }
