@@ -2,8 +2,12 @@ html, body, h1, h4, ul, li, main, div {
   font-family: 'Open Sans', sans-serif;
   margin: 0 auto;
   font-size: 16px;
-  background-color: black;
-  color: white;
+  background-color: #09092a;;
+  color: #FFFFF0;
+}
+
+h1 {
+  margin-bottom: 30px;
 }
 
 ul {
@@ -15,7 +19,10 @@ a {
 }
 
 #initial-results-ul {
-  font-size: 16px;
+  padding: 0;
+  margin: 0 auto;
+  max-width: 600px;
+  min-width: 400px;
 }
 
 #sources {
@@ -30,22 +37,26 @@ a {
 }
 
 .list-item {
-  padding: 5px;
+  padding: 0;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
   border-bottom: 1px solid #808080;
-  text-overflow: ellipsis;
-  min-width: 400px;
+  font-weight: 700;
 }
 
 .list-item:hover {
   background-color: #F0FFFF;
-  color: black;
+  color: #09092a;
   cursor: pointer;
 }
 
 .movie-poster {
   margin: 20px auto;
   display: block;
-  border: 1px solid white;
+  border: 1px solid #FFFFF0;
 }
 
 .movie-title {

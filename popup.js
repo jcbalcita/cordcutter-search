@@ -83,14 +83,22 @@ function newSourceList(type) {
 function displayMovieDetail(movie) {
   addMoviePoster(movie.poster_240x342);
   addMovieTitle(movie.title, movie.release_year);
-  // addFreeSources(movie.free_web_sources);
+  addFreeSources(movie.free_web_sources);
   addSubSources(movie.subscription_web_sources);
   addTVESources(movie.tv_everywhere_web_sources);
   // addPurchaseSources(movie.purchase_web_sources);
 }
 
 function addFreeSources(freeSources) {
+  if (freeSources.length === 0) {
+    return null;
+  } else {
+    const ul = newSourceList("Free:");
 
+    freeSources.forEach(source => {
+      addSource(source, ul);
+    });
+  }
 }
 
 function addSubSources(subSources) {
