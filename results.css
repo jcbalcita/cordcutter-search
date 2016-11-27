@@ -1,24 +1,76 @@
-body {
+html, body, h1, h4, ul, li, main, div {
   font-family: 'Open Sans', sans-serif;
   margin: 0 auto;
+  font-size: 16px;
+  background-color: black;
+  color: white;
 }
 
 ul {
   list-style: none;
 }
 
-li {
-  padding: 5px;
-  border-bottom: 1px solid #808080;
-  text-overflow: ellipsis;
-  width: 400px;
-}
-
-li:hover {
-  background-color: #F0FFFF;
-  cursor: pointer;
+a {
+  color: #B0E0E6;
 }
 
 #initial-results-ul {
   font-size: 16px;
+}
+
+#sources {
+  padding: 0;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  flex-wrap: wrap;
+  max-width: 600px;
+  min-width: 400px;
+}
+
+.list-item {
+  padding: 5px;
+  border-bottom: 1px solid #808080;
+  text-overflow: ellipsis;
+  min-width: 400px;
+}
+
+.list-item:hover {
+  background-color: #F0FFFF;
+  color: black;
+  cursor: pointer;
+}
+
+.movie-poster {
+  margin: 20px auto;
+  display: block;
+  border: 1px solid white;
+}
+
+.movie-title {
+  margin: 0 auto;
+  padding: 15px;
+  display: block;
+  font-size: 18px;
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.source-list {
+  padding: 0;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-content: flex-start;
+}
+
+.logo {
+  width: 80px;
+  padding: 15px;
+}
+
+.logo:hover {
+  box-shadow: 1px 1px 1px 1px #F0FFFF;
 }
