@@ -8,14 +8,23 @@ chrome.runtime.sendMessage({ action: 'getResults' }, function(response) {
 
 function processShowResults(results) {
   if (results.length > 0) {
-    results.forEach(show => appendListItem(show));
+    results.forEach(show => appendShowItem(show));
     console.log(results);
   } else {
     document.getElementById("results").innerHTML = "No results found."
   }
 }
 
-function appendListItem(show) {
+function processMovieResults(results) {
+  if (results.length > 0) {
+    results.forEach(movie => appendMovieItem(movie));
+    console.log(results);
+  } else {
+    document.getElementById("results").innerHTML = "No results found."
+  }
+}
+
+function appendShowItem(show) {
   const resultEl = document.getElementById("initial-results-ul");
   let listItem = document.createElement("li");
   let image = document.createElement("img");
@@ -27,6 +36,22 @@ function appendListItem(show) {
 
   listItem.appendChild(image);
   listItem.appendChild(newSpan(show.title));
+
+  resultEl.appendChild(listItem);
+}
+
+function appendMovieItem(movie) {
+  const resultEl = document.getElementById("initial-results-ul");
+  let listItem = document.createElement("li");
+  let image = document.createElement("img");
+  image.src = movie.poster_120x171;
+
+  listItem.className = "list-item";
+  listItem.dataset.id = movie.id;
+  listItem.onclick = getMovieById.bind(this, movie.id);
+
+  listItem.appendChild(image);
+  listItem.appendChild(newSpan(`${movie.title} (${movie.release_year})`));
 
   resultEl.appendChild(listItem);
 }
@@ -47,16 +72,18 @@ function searchForShow(searchString) {
 
   xhr.open('GET', url, true);
   xhr.responseType = 'json';
+  document.getElementById("loading").innerHTML = "Loading..."
+
 
   xhr.onload = function () {
     if (xhr.readyState === xhr.DONE) {
       if (xhr.status === 200) {
+        document.getElementById("loading").innerHTML = ""
         processShowResults(xhr.response.results);
-      } else {
-        document.getElementById("initial-results").innerHTML = "Loading..."
       }
     }
   };
+
   xhr.send();
 }
 
@@ -74,10 +101,9 @@ function searchForMovie(searchString) {
   xhr.onload = function () {
     if (xhr.readyState === xhr.DONE) {
       if (xhr.status === 200) {
-        const resultEl = document.getElementById("search-results");
-        const titles = xhr.response.results.map(movie => `${movie.title}`);
-        console.log(xhr.response.results);
-        resultEl.innerHTML = titles;
+        processMovieResults(xhr.response.results);
+      } else {
+        document.getElementById("initial-results").innerHTML = "Loading..."
       }
     }
   };
@@ -100,6 +126,7 @@ function getShowById(id) {
       if (xhr.status === 200) {
         console.log(xhr.response);
         // do moar stuff here
+        // 
       }
     }
   };
