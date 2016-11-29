@@ -1,44 +1,19 @@
-<!doctype html>
-<!--
- This page is shown when the extension button is clicked, because the
- "browser_action" field in manifest.json contains the "default_popup" key with
- value "popup.html".
- -->
+<!DOCTYPE html>
 <html>
   <head>
-    <title>Search for streams!</title>
-    <style>
-      body {
-        font-family: "Segoe UI", "Lucida Grande", Tahoma, sans-serif;
-        font-size: 100%;
-        margin: 0 auto;
-      }
-
-      #search-forms {
-        width: 400px;
-      }
-
-      #search-forms  * {
-        display: inline-block;
-        padding: 5px;
-        margin: 5px;
-      }
-    </style>
+    <meta charset="utf-8">
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,700" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="popup.css">
+    <script src="results.js"></script>
     <script src="popup.js"></script>
+    <title>Where can I stream it?</title>
   </head>
-
   <body>
-
     <div id="search-forms">
-      <form class="search-input" action="index.html" method="post">
-        <input type="text" placeholder="Search by show title" value="">
-        <input type="submit" name="name" value="Search">
-      </form>
-    </div>
-
-    <div id="popup-search-results">
-    </div>
-
+     <form class="search-input" action="index.html" method="post">
+       <input type="text" placeholder="Search by title" value="">
+       <input type="submit" name="name" value="Search">
+     </form>
+   </div>
   </body>
-
 </html>

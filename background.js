@@ -1,5 +1,6 @@
 let searchString;
 let searchType;
+let currentSource = false;
 
 chrome.contextMenus.create({
   id: "search-show",
@@ -23,7 +24,7 @@ chrome.contextMenus.create({
 });
 
 chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
-    if(request.action === 'getResults') {
-      sendResponse({ source: searchString, type: searchType });
-    }
+  if (request.action === 'getResults') {
+    sendResponse({ source: searchString, type: searchType });
+  }
 });
