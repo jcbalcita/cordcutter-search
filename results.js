@@ -32,9 +32,13 @@ function appendShowItem(show) {
     image.src = show.artwork_208x117;
   let listItem = newListItem("initial");
     listItem.dataset.id = show.id;
-    listItem.onclick = getShowById.bind(this, show.id);
     listItem.appendChild(image);
     listItem.appendChild(newSpan(show.title));
+
+    listItem.onclick = function() {
+      resultEl.textContent = "";
+      getShowById(show.id);
+    }
 
   resultEl.appendChild(listItem);
 }
@@ -88,13 +92,127 @@ function noSources(movie) {
   }
 }
 
+function displayShowDetail(show) {
+  addPoster(show.artwork_304x171);
+  addTitle(show.title, show.first_aired.slice(0, 4));
+  getGeneralShowContent(show.id);
+  getNumberOfSeasons(show.id);
+}
+
+function receiveGeneralContent(generalContent) {
+  const generalSources = document.getElementById("general-sources");
+  console.log(generalContent)
+  if (generalContent.length === 0) {
+    generalSources.textContent = "We were uanble to find any non-purchase streams for this show."
+  } else {
+    let linebreak = document.createElement("br");
+    generalSources.textContent = `This show is available for streaming on the below platforms. For specific information and links, select a season.`
+    generalSources.appendChild(linebreak);
+    generalContent.forEach(source => appendGeneralSource(source));
+  }
+}
+
+function appendGeneralSource(source) {
+    p = document.createElement("p");
+    let type = source.type === "tv_everywhere" ? "Cable/Dish Login Required" : source.type
+    p.innerHTML = `${source.display_name.bold()}  (${type})`;
+
+    if (type !== "purchase") {
+      const generalSources = document.getElementById("general-sources");
+      generalSources.appendChild(p);
+    }
+}
+
+function createEpisodeList(results) {
+  const episodes = document.getElementById("episode-list");
+  if (results.length === 0) {
+    episodes.textContent = "No episode information for this season. Sorry about that."
+  } else {
+    results.forEach(episode => newEpisodeItem(episode, episodes));
+  }
+}
+
+function newEpisodeItem(episode, episodes) {
+  const episodeLi = document.createElement("li");
+    episodeLi.className = "episode-item";
+
+  const episodeTitle = newSpan(`Episode ${episode.episode_number}:  ${episode.original_title}`)
+  const linebreak = document.createElement("br");
+    episodeLi.appendChild(episodeTitle);
+    episodeLi.appendChild(linebreak);
+
+
+  if (episode.free_web_sources.length > 0) {
+    let link = document.createElement("a");
+      link.href = episode.free_web_sources[0].link
+      link.textContent = `${episode.free_web_sources[0].display_name} (free)`;
+    episodeLi.appendChild(link);
+  }
+
+  if (episode.subscription_web_sources.length > 0) {
+    episode.subscription_web_sources.forEach(source =>{
+      let link = document.createElement("a");
+        link.href = source.link;
+        link.target = "_blank";
+        link.textContent = `${source.display_name} (sub)`
+      episodeLi.appendChild(link);
+    })
+    episodeLi.appendChild(linebreak);
+  }
+
+  if (episode.tv_everywhere_web_sources.length > 0) {
+    episode.tv_everywhere_web_sources.forEach(source =>{
+      let link = document.createElement("a");
+        link.href = source.link
+        link.target = "_blank";
+        link.textContent = `${source.display_name} (login required)`
+      episodeLi.appendChild(link);
+    })
+    episodeLi.appendChild(linebreak);
+  }
+
+  if (episode.purchase_web_sources.length > 0) {
+    episode.purchase_web_sources.forEach(source =>{
+      let link = document.createElement("a");
+        link.href = source.link
+        link.target = "_blank";
+        link.textContent = `${source.display_name} $${source.formats[0].price}`
+      episodeLi.appendChild(link);
+    })
+  }
+
+  episodes.appendChild(episodeLi);
+}
+
+function createSeasonList(showId, seasonNumbers) {
+  if (seasonNumbers.length === 0) {
+    return null;
+  }
+  const seasonDetail = document.getElementById("season-detail");
+  seasonNumbers.forEach(seasonNum => newSeasonListItem(showId, seasonNum))
+}
+
+function newSeasonListItem(showId, seasonNum) {
+  const seasonList = document.getElementById("season-list")
+  const li = document.createElement("li");
+    li.className = "season-list-item";
+    li.onclick = function() {
+      const episodes = document.getElementById("episode-list");
+        episodes.textContent = "";
+      getSeasonInfo(showId, seasonNum);
+    }
+    li.textContent = `Season ${seasonNum}`
+
+  seasonList.appendChild(li);
+}
+
 function displayMovieDetail(movie) {
-  addMoviePoster(movie.poster_240x342);
-  addMovieTitle(movie.title, movie.release_year);
+  addPoster(movie.poster_240x342);
+  addTitle(movie.title, movie.release_year);
 
   if (noSources(movie)) {
     const sources = document.getElementById("sources");
-    sources.textContent = "We were unable to find any non-purchase stream sources for this movie."
+    sources.textContent = "We were unable to find any non-purchase streams for this movie."
   }
 
   addFreeSources(movie.free_web_sources);
@@ -159,12 +277,7 @@ function addSource(source, sourceList) {
   sourceList.appendChild(li);
 }
 
-
-// function displayShowDetail(show) {
-//
-// }
-
-function addMovieTitle(title, year) {
+function addTitle(title, year) {
   const detail = document.getElementById("item-detail");
   const yearString = year.toString();
   const h3 = document.createElement("h3");
@@ -174,11 +287,11 @@ function addMovieTitle(title, year) {
   detail.appendChild(h3);
 }
 
-function addMoviePoster(poster) {
+function addPoster(poster) {
   const detail = document.getElementById("item-detail");
   let img = document.createElement("img");
     img.src = poster;
-    img.className = "movie-poster"
+    img.className = "poster"
 
   detail.appendChild(img);
 }
@@ -237,15 +350,30 @@ function searchForMovie(searchString) {
 
 // Request information on show by ID
 function getShowById(id) {
-  const url = `https://api-public.guidebox.com/v1.43/US/rKy1Hw9qICyXezey3TcAJ2uv0bWwQkmL/show/${id}/seasons`;
+  const url = `https://api-public.guidebox.com/v1.43/US/rKy1Hw9qICyXezey3TcAJ2uv0bWwQkmL/show/${id}`;
 
   const xhr = newXHR(url);
   xhr.onload = function () {
     if (xhr.readyState === xhr.DONE) {
       if (xhr.status === 200) {
         console.log(xhr.response);
-        // do moar stuff here
-        //
+        displayShowDetail(xhr.response);
+      }
+    }
+  };
+
+  xhr.send();
+}
+// Request available content generally -- no links, no specifics
+function getGeneralShowContent(id) {
+  const url = `https://api-public.guidebox.com/v1.43/US/rKy1Hw9qICyXezey3TcAJ2uv0bWwQkmL/show/${id}/available_content`;
+
+
+  const xhr = newXHR(url);
+  xhr.onload = function () {
+    if (xhr.readyState === xhr.DONE) {
+      if (xhr.status === 200) {
+        receiveGeneralContent(xhr.response.results.web.episodes.all_sources)
       }
     }
   };
@@ -278,8 +406,9 @@ function getNumberOfSeasons(id) {
   xhr.onload = function () {
     if (xhr.readyState === xhr.DONE) {
       if (xhr.status === 200) {
-        console.log(xhr.response);
-        // do moar stuff here
+        const seasonNumbers = xhr.response.results.map(season => season.season_number);
+        console.log(seasonNumbers);
+        createSeasonList(id, seasonNumbers)
       }
     }
   };
@@ -297,7 +426,7 @@ function getSeasonInfo(id, season) {
     if (xhr.readyState === xhr.DONE) {
       if (xhr.status === 200) {
         console.log(xhr.response);
-        // do moar stuff here
+        createEpisodeList(xhr.response.results)
       }
     }
   };
