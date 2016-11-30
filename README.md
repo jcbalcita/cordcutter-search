@@ -4,10 +4,11 @@ A Chrome extension that allows users, via the [GuideBox API](http://www.guidebox
 
 ## MVP
 
-- [ ] Has clickable icon that opens `popup.html`, which in turn renders a functional "search by title" form.
+<del> - [ ] Has clickable icon that opens `popup.html`, which in turn renders a functional "search by title" form.<del>
 - [ ] Grabs selected text from the page and fires off API requests to GuideBox via context menus.
 - [ ] Allows users to search by show or movie title and find out on which websites the show is available for streaming.
 - [ ] Allows user to check if a specific season of a show is available for streaming.
+- [ ] Provides links to specific episodes.
 
 ### Bonus
 
