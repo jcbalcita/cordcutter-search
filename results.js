@@ -1,3 +1,6 @@
+//*********************************************************************
+// READY SIGNAL
+//*********************************************************************
 chrome.runtime.sendMessage({ action: 'getResults' }, function(response) {
   if (response.type === "show") {
     searchForShow(response.source);
@@ -6,12 +9,12 @@ chrome.runtime.sendMessage({ action: 'getResults' }, function(response) {
   }
 });
 
-const hasLogo = ["Netflix", "Amazon Prime", "Hulu"]
-
+//*********************************************************************
+// INITIAL SEARCH
+//*********************************************************************
 function processShowResults(results) {
   if (results.length > 0) {
     results.forEach(show => appendShowItem(show));
-    console.log(results);
   } else {
     document.getElementById("results").textContent = "No results found."
   }
@@ -20,7 +23,6 @@ function processShowResults(results) {
 function processMovieResults(results) {
   if (results.length > 0) {
     results.forEach(movie => appendMovieItem(movie));
-    console.log(results);
   } else {
     document.getElementById("results").textContent = "No results found."
   }
@@ -72,26 +74,9 @@ function newSpan(content) {
   return span;
 }
 
-function newSourceList(type) {
-  const sources = document.getElementById("sources")
-  const ul = document.createElement("ul");
-    ul.className = "source-list";
-  const h4 = document.createElement("h4");
-    h4.textContent = type;
-
-  ul.appendChild(h4);
-  sources.appendChild(ul);
-  return ul;
-}
-
-function noSources(movie) {
-  if (movie.free_web_sources.length === 0 &&
-      movie.subscription_web_sources.length === 0 &&
-      movie.tv_everywhere_web_sources.length === 0) {
-    return true;
-  }
-}
-
+//*********************************************************************
+// SHOW/MOVIE DETAIL
+//*********************************************************************
 function displayShowDetail(show) {
   addPoster(show.artwork_304x171);
   addTitle(show.title, show.first_aired.slice(0, 4));
@@ -99,9 +84,27 @@ function displayShowDetail(show) {
   getNumberOfSeasons(show.id);
 }
 
+function displayMovieDetail(movie) {
+  addPoster(movie.poster_240x342);
+  addTitle(movie.title, movie.release_year);
+
+  if (noSources(movie)) {
+    const sources = document.getElementById("sources");
+    sources.textContent = "We were unable to find any non-purchase streams for this movie."
+  }
+
+  addFreeSources(movie.free_web_sources);
+  addSubSources(movie.subscription_web_sources);
+  addTVESources(movie.tv_everywhere_web_sources);
+}
+
+
+//************************
+// TV SHOW GENERAL CONTENT
+//************************
 function receiveGeneralContent(generalContent) {
   const generalSources = document.getElementById("general-sources");
-  console.log(generalContent)
+
   if (generalContent.length === 0) {
     generalSources.textContent = "We were uanble to find any non-purchase streams for this show."
   } else {
@@ -123,6 +126,9 @@ function appendGeneralSource(source) {
     }
 }
 
+//*********************
+// TV SHOW EPISODES
+//*********************
 function createEpisodeList(results) {
   const episodes = document.getElementById("episode-list");
   if (results.length === 0) {
@@ -139,49 +145,35 @@ function newEpisodeItem(episode, episodes) {
   const episodeTitle = newSpan(`Episode ${episode.episode_number}:  ${episode.original_title}`)
   const linebreak = document.createElement("br");
     episodeLi.appendChild(episodeTitle);
-    episodeLi.appendChild(linebreak);
 
+  iterEpisodeSources(episode.free_web_sources, "free", episodeLi)
+  iterEpisodeSources(episode.subscription_web_sources, "subscription", episodeLi)
+  iterEpisodeSources(episode.tv_everywhere_web_sources, "tv_everywhere", episodeLi)
+  iterEpisodeSources(episode.purchase_web_sources, "purchase", episodeLi)
 
-  if (episode.free_web_sources.length > 0) {
-    let link = document.createElement("a");
-      link.href = episode.free_web_sources[0].link
-      link.textContent = `${episode.free_web_sources[0].display_name} (free)`;
-    episodeLi.appendChild(link);
+  episodes.insertBefore(episodeLi, episodes.firstChild);
+}
+
+function iterEpisodeSources(sources, type, episodeLi) {
+  const texts = {
+    "free": "(free)",
+    "subscription": "(sub)",
+    "tv_everywhere": "(login required)",
   }
 
-  if (episode.subscription_web_sources.length > 0) {
-    episode.subscription_web_sources.forEach(source =>{
+  if (sources.length === 0) {
+    return
+  } else {
+
+    sources.forEach(source => {
+      let titleType = type === "purchase" ? `$${source.formats[0].price}` : texts[type]
       let link = document.createElement("a");
         link.href = source.link;
         link.target = "_blank";
-        link.textContent = `${source.display_name} (sub)`
+        link.textContent = `${source.display_name} ${titleType}`;
       episodeLi.appendChild(link);
-    })
-    episodeLi.appendChild(linebreak);
+    });
   }
-
-  if (episode.tv_everywhere_web_sources.length > 0) {
-    episode.tv_everywhere_web_sources.forEach(source =>{
-      let link = document.createElement("a");
-        link.href = source.link
-        link.target = "_blank";
-        link.textContent = `${source.display_name} (login required)`
-      episodeLi.appendChild(link);
-    })
-    episodeLi.appendChild(linebreak);
-  }
-
-  if (episode.purchase_web_sources.length > 0) {
-    episode.purchase_web_sources.forEach(source =>{
-      let link = document.createElement("a");
-        link.href = source.link
-        link.target = "_blank";
-        link.textContent = `${source.display_name} $${source.formats[0].price}`
-      episodeLi.appendChild(link);
-    })
-  }
-
-  episodes.appendChild(episodeLi);
 }
 
 function createSeasonList(showId, seasonNumbers) {
@@ -206,19 +198,15 @@ function newSeasonListItem(showId, seasonNum) {
   seasonList.appendChild(li);
 }
 
-function displayMovieDetail(movie) {
-  addPoster(movie.poster_240x342);
-  addTitle(movie.title, movie.release_year);
-
-  if (noSources(movie)) {
-    const sources = document.getElementById("sources");
-    sources.textContent = "We were unable to find any non-purchase streams for this movie."
+//*********************
+// MOVIE SOURCES
+//*********************
+function noSources(movie) {
+  if (movie.free_web_sources.length === 0 &&
+      movie.subscription_web_sources.length === 0 &&
+      movie.tv_everywhere_web_sources.length === 0) {
+    return true;
   }
-
-  addFreeSources(movie.free_web_sources);
-  addSubSources(movie.subscription_web_sources);
-  addTVESources(movie.tv_everywhere_web_sources);
-  // addPurchaseSources(movie.purchase_web_sources);
 }
 
 function addFreeSources(freeSources) {
@@ -258,12 +246,13 @@ function addTVESources(tveSources) {
 }
 
 function addSource(source, sourceList) {
+  const hasLogo = ["Netflix", "Amazon Prime", "Hulu"]
   const li = newListItem("source");
   const a = document.createElement("a");
     a.href = source.link;
     a.className = "source-link";
     a.target = "_blank";
-    li.appendChild(a);
+  li.appendChild(a);
 
     if (hasLogo.includes(source.display_name)) {
       const img = document.createElement("img");
@@ -277,6 +266,21 @@ function addSource(source, sourceList) {
   sourceList.appendChild(li);
 }
 
+function newSourceList(type) {
+  const sources = document.getElementById("sources")
+  const ul = document.createElement("ul");
+    ul.className = "source-list";
+  const h4 = document.createElement("h4");
+    h4.textContent = type;
+
+  ul.appendChild(h4);
+  sources.appendChild(ul);
+  return ul;
+}
+
+//****************************
+// SHOW/MOVIE SHARED FUNCTIONS
+//****************************
 function addTitle(title, year) {
   const detail = document.getElementById("item-detail");
   const yearString = year.toString();
@@ -296,11 +300,9 @@ function addPoster(poster) {
   detail.appendChild(img);
 }
 
-
-//
-// API CALLS, i.e. SEARCHES!
-//
-
+//*********************************************************************
+// API CALL FUNCTIONS
+//*********************************************************************
 function newXHR(url) {
   const xhr = new XMLHttpRequest();
   xhr.open('GET', url, true);
@@ -309,8 +311,6 @@ function newXHR(url) {
   return xhr;
 }
 
-// Search by show title
-// {Base API URL} /search/title/ {TRIPLE url encoded show name} / {"exact" or "fuzzy"}
 function searchForShow(searchString) {
   const url = `https://api-public.guidebox.com/v1.43/US/rKy1Hw9qICyXezey3TcAJ2uv0bWwQkmL/search/title/${searchString}`;
   document.getElementById("loading").textContent = "Loading..."
@@ -328,9 +328,6 @@ function searchForShow(searchString) {
   xhr.send();
 }
 
-
-// Search by movie title
-// {Base API URL} /search/movie/title/ {TRIPLE url encoded show name} / {"exact" or "fuzzy"}
 function searchForMovie(searchString) {
   const url = `https://api-public.guidebox.com/v1.43/US/rKy1Hw9qICyXezey3TcAJ2uv0bWwQkmL/search/movie/title/${searchString}`;
   document.getElementById("loading").textContent = "Loading..."
@@ -348,7 +345,6 @@ function searchForMovie(searchString) {
   xhr.send();
 }
 
-// Request information on show by ID
 function getShowById(id) {
   const url = `https://api-public.guidebox.com/v1.43/US/rKy1Hw9qICyXezey3TcAJ2uv0bWwQkmL/show/${id}`;
 
@@ -356,7 +352,6 @@ function getShowById(id) {
   xhr.onload = function () {
     if (xhr.readyState === xhr.DONE) {
       if (xhr.status === 200) {
-        console.log(xhr.response);
         displayShowDetail(xhr.response);
       }
     }
@@ -364,10 +359,9 @@ function getShowById(id) {
 
   xhr.send();
 }
-// Request available content generally -- no links, no specifics
+
 function getGeneralShowContent(id) {
   const url = `https://api-public.guidebox.com/v1.43/US/rKy1Hw9qICyXezey3TcAJ2uv0bWwQkmL/show/${id}/available_content`;
-
 
   const xhr = newXHR(url);
   xhr.onload = function () {
@@ -381,7 +375,6 @@ function getGeneralShowContent(id) {
   xhr.send();
 }
 
-// Request information on movie by ID
 function getMovieById(id) {
   const url = `https://api-public.guidebox.com/v1.43/US/rKy1Hw9qICyXezey3TcAJ2uv0bWwQkmL/movie/${id}`;
   const xhr = newXHR(url);
@@ -389,7 +382,6 @@ function getMovieById(id) {
   xhr.onload = function () {
     if (xhr.readyState === xhr.DONE) {
       if (xhr.status === 200) {
-        console.log(xhr.response);
         displayMovieDetail(xhr.response)
       }
     }
@@ -398,7 +390,6 @@ function getMovieById(id) {
   xhr.send();
 }
 
-// Request how many seasons a show has
 function getNumberOfSeasons(id) {
   const url = `https://api-public.guidebox.com/v1.43/US/rKy1Hw9qICyXezey3TcAJ2uv0bWwQkmL/show/${id}/seasons`;
   const xhr = newXHR(url);
@@ -407,7 +398,6 @@ function getNumberOfSeasons(id) {
     if (xhr.readyState === xhr.DONE) {
       if (xhr.status === 200) {
         const seasonNumbers = xhr.response.results.map(season => season.season_number);
-        console.log(seasonNumbers);
         createSeasonList(id, seasonNumbers)
       }
     }
@@ -416,8 +406,6 @@ function getNumberOfSeasons(id) {
   xhr.send();
 }
 
-// Request information on a specific season of a show
-//{Base API URL} /show/ {id} /episodes/ {season} / {limit 1} / {limit 2} / {sources} / {platform} / {include links}
 function getSeasonInfo(id, season) {
   const url = `https://api-public.guidebox.com/v1.43/US/rKy1Hw9qICyXezey3TcAJ2uv0bWwQkmL/show/${id}/episodes/${season}/1/25/all/web/true`;
   const xhr = newXHR(url);
@@ -425,7 +413,6 @@ function getSeasonInfo(id, season) {
   xhr.onload = function () {
     if (xhr.readyState === xhr.DONE) {
       if (xhr.status === 200) {
-        console.log(xhr.response);
         createEpisodeList(xhr.response.results)
       }
     }
