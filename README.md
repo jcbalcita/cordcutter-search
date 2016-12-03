@@ -2,21 +2,15 @@
 
 A Chrome extension that allows users, via the [GuideBox API](http://www.guidebox.com), to find out if a show or movie is available for licensed streaming on the web.
 
-## MVP
+## Features Checklist
 
-<del> - [ ] Has clickable icon that opens `popup.html`, which in turn renders a functional "search by title" form.<del>
-- [ ] Grabs selected text from the page and fires off API requests to GuideBox via context menus.
-- [ ] Allows users to search by show or movie title and find out on which websites the show is available for streaming.
-- [ ] Allows user to check if a specific season of a show is available for streaming.
-- [ ] Provides links to specific episodes.
+- [x] Has clickable icon that opens `popup.html`, which in turn renders a functional "search by title" form.
+- [x] Grabs selected text from the page and fires off API requests to GuideBox via context menus.
+- [x] Allows users to search by show or movie title and find out on which websites the show is available for streaming.
+- [x] Allows user to check if a specific season of a show is available for streaming.
+- [x] Provides links to watch specific episodes.
 
-### Bonus
-
-- [ ] Users can specify the platform (_i.e._, iOS, Android, or Web) for the stream search.
-- [ ] Users can specify the service (_e.g._, Hulu, Netflix) for the stream search.
-- [ ] Users can view _n_ number of old searches and bookmarked shows/movies.
-
-## Features and Functionality
+## Funcationality
 
 Cordcutter Search provides its users with an easy, convenient way to find out if a show is available for streaming.
 
@@ -24,90 +18,129 @@ There are two ways a user will be able to get stream info regarding a movie or T
 - Selecting the text title on the webpage, right-clicking, and clicking on the appropriate option, which fires off the search.
 - Clicking on the extension's icon, which opens up a tab containing an HTML form in which the user can manually type in the title by which to search.
 
-### Preliminary Plans
+### Search Feature
 
-#### Manifest
+Both the search form and context menus work by setting the search type (either "movie" or "show") and the search string into Chrome's local storage, then opening up the `results.html` page.
 
-In the `manifest.json` file, I plan to declare the following:
+Once the DOM elements in `results.html` are loaded, `results.js` fires off a `chrome.storage.local.get` request with a callback function that fires off the appropriate API XMLHttpRequest.
 
 ```javascript
-{
-  "manifest_version": 2,
+// background.js
+chrome.contextMenus.create({
+  title: "Search by SHOW title",
+  contexts:["selection"],
+  onclick: function(e) {
+    chrome.storage.local.set({ search: encodeURIComponent(e.selectionText), type: "show" },
+    () => chrome.tabs.create({ url: "results.html" }));
+  }
+});
 
-  "name": "Cordcutter Search",
-  "description": "For cordcutters who have to constantly ask - 'where can I stream it?'",
-  "version": "0.1",
-  "background": {
-    "scripts": ["background.js"]
-  },
-  "browser_action": {
-    "default_icon": "cordcutter.png",
-    "default_title": "Cordcutter Search"
-  },
-  "permissions": [
-    "activeTab",
-    "contextMenus",
-    "storage",
-    "http://*.guidebox.com"
-  ]
+chrome.contextMenus.create({
+  title: "Search by MOVIE title",
+  contexts:["selection"],
+  onclick: function(e) {
+    chrome.storage.local.set({ search: encodeURIComponent(e.selectionText), type: "movie" },
+    () => chrome.tabs.create({ url: "results.html" }));
+  }
+});
+
+// popup.js
+movieButton.onclick = function() {
+  chrome.storage.local.set({ type: "movie" });
+  this.className = "set-button-selected";
+  showButton.className = "set-button";
+}
+
+showButton.onclick = function() {
+  chrome.storage.local.set({ type: "show" });
+  this.className = "set-button-selected";
+  movieButton.className = "set-button";
+}
+
+form.addEventListener("submit", e => {
+  e.preventDefault();
+  chrome.storage.local.set({ search: input.value },
+  () => chrome.tabs.create({ url: "results.html" }));
+});
+```
+
+#### Search Form
+
+`popup.html` contains an input element in which users can type in search terms.  There are two buttons above that changes the search type between "movie" and "show."
+
+![alt text](http://res.cloudinary.com/jcbalcita/image/upload/v1480795373/Screen_Shot_2016-12-03_at_10.36.40_jahoex.png)
+
+#### Context Menu Search
+
+Users can also search by highlighting text on the page, then right-clicking to access the extension's context menu options.
+
+![alt text](http://res.cloudinary.com/jcbalcita/image/upload/v1480640192/Screen_Shot_2016-12-01_at_16.55.59_pzpqtk.png)
+
+### Search results
+
+Results of the search are displayed in a new tab.  Each item in the list is an <li> element with an `onclick` function that fires off an API call to retreive information on that particular show.
+
+![alt text](http://res.cloudinary.com/jcbalcita/image/upload/v1480654395/Screen_Shot_2016-12-01_at_20.52.26_hgjapp.png)
+
+### Detail page
+
+The detail page displays a list of where the show is available for streaming generally, and also provides buttons for each season.  When a specific season is clicked, the user is given direct links to specific episodes.
+
+![alt text](http://res.cloudinary.com/jcbalcita/image/upload/v1480640501/Screen_Shot_2016-12-01_at_17.01.19_gp1smg.png)
+
+The detail page is the most complex portion of the extension and contains multiple API calls due to the way show information is stored by the GuideBox API.
+1. Get show by ID
+  - Retrieves movie poster, title, and other gneral information
+2. Available streaming sources for the show generally
+  - Retrieves available source names (contains no other information)
+3. Number of seasons
+  - Retrieves the season numbers for the seasons available for streaming.
+  - A button is created for each season with an `onclick` function that fires off an API call using the show's ID and the season number.
+4. Once the season button is clicked, it fires off another API call that displays a list of episodes containing links to watch that specific episode.
+
+```javascript
+function displayShowDetail(show) {
+  addPoster(show.artwork_304x171);
+  addTitle(show.title, show.first_aired.slice(0, 4));
+  getGeneralShowContent(show.id);
+  getNumberOfSeasons(show.id);
+}
+
+function getNumberOfSeasons(id) {
+  const url = `https://api-public.guidebox.com/v1.43/US/rKy1Hw9qICyXezey3TcAJ2uv0bWwQkmL/show/${id}/seasons`;
+  const xhr = newXHR(url);
+
+  xhr.onload = function () {
+    if (xhr.readyState === xhr.DONE) {
+      if (xhr.status === 200) {
+        const seasonNumbers = xhr.response.results.map(season => season.season_number);
+        createSeasonList(id, seasonNumbers)
+      }
+    }
+  };
+
+  xhr.send();
+}
+
+function createSeasonList(showId, seasonNumbers) {
+  if (seasonNumbers.length === 0) {
+    return null;
+  }
+  const seasonDetail = document.getElementById("season-detail");
+  seasonNumbers.forEach(seasonNum => newSeasonListItem(showId, seasonNum))
+}
+
+function newSeasonListItem(showId, seasonNum) {
+  const seasonList = document.getElementById("season-list")
+  const li = document.createElement("li");
+    li.className = "season-list-item";
+    li.onclick = function() {
+      const episodes = document.getElementById("episode-list");
+        episodes.textContent = "";
+      getSeasonInfo(showId, seasonNum);
+    }
+    li.textContent = `Season ${seasonNum}`
+
+  seasonList.appendChild(li);
 }
 ```
-
-I declare a `background.js` file that contains the code for creating and firing the context menus.  I also declare the permissions for access to the active tab, context menus, Chrome's storage feature (for bonus), and the GuideBox API.  The file `popup.html` will render the search form and the results, if any.
-
-#### Context Menus
-
-I plan to create the appropriate context menus within `background.js` in the following manner:
-
-```javascript
-chrome.contextMenus.create({
- title: "Search by SHOW title",
- contexts:["selection"],
- onclick: searchShow
-});
-
-chrome.contextMenus.create({
- title: "Search by MOVIE title",
- contexts:["selection"],
- onclick: searchMovie
-});
-```
-
-## Implementation and Timeline
-
-### Day 0
-- [x] Write up the `manifest.json` file.
-- [x] Research how to add context menus and write the appropriate code to create them.
-- [x] Sign up for GuideBox API, and make XML requests in the console to make sure I understand how to make a call and the format of the response.
-
-### Day 1
-- [x] Document the URL structure for all API calls to GuideBox that my extension will need.
-  + Search by show title ✔️
-  + Search by movie title ✔️
-  + Request information on show by ID ✔️
-  + Request information on movie by ID ✔️
-  + Request information on specific season of a show ✔️
-- [x] Declare an icon for my extension, get the icon to appear and open popup.html when clicked on.
-
-### Day 2
-- Write the `handleClick` functions for the context menu items, and make sure fire off functional API calls by console logging the results.
-- Write outline for `popup.html`.
-  + Forms for "Search by movie title" and "Search by show title"
-  + Declare DOM element with the id "search-results" in which to display matching show/movie title, year, and genre.
-  + Declare DOM Element with the id "item-detail" in which to display information on a single show or movie – if show, streaming information on specific seasons.
-- Successfully grab element by ID and change its contents using vanilla JavaScript.
-
-### Day 3
-- Figure out how to coordinate the context menu actions in `background.js` with `cordcutter.js` and `popup.html`.
-
-### Day 4
-- Both the search form in `popup.html` and the context menu items fire off the appropriate API call and send the results to `popup.html`.
-- `popup.html` displays the API response in plain JSON format.
-
-### Day 5
-- Style `popup.html` to display results and information in a presentable, intuitive manner.
-- General bugfixing.
-
-### Day 6 and beyond
-- Bugfixing and refactoring as needed.
-- Add bonus features.

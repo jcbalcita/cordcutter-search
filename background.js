@@ -1,6 +1,3 @@
-let searchString;
-let searchType;
-
 chrome.contextMenus.create({
   title: "Search by SHOW title",
   contexts:["selection"],
