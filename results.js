@@ -1,12 +1,11 @@
 //*********************************************************************
 // READY SIGNAL
 //*********************************************************************
-chrome.runtime.sendMessage({ action: 'getResults' }, function(response) {
-  if (response.type === "show") {
-    searchForShow(response.source);
-  } else if (response.type === "movie") {
-    searchForMovie(response.source);
-  }
+
+document.addEventListener("DOMContentLoaded", () => {
+  chrome.storage.local.get(["search", "type"], data => {
+    data.type === "movie" ? searchForMovie(data.search) : searchForShow(data.search)
+  });
 });
 
 //*********************************************************************

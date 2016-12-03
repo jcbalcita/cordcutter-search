@@ -2,24 +2,24 @@ let searchString;
 let searchType;
 
 chrome.contextMenus.create({
-  id: "search-show",
   title: "Search by SHOW title",
   contexts:["selection"],
   onclick: function(e) {
-    curretSource = true;
-    chrome.tabs.create({ url: "results.html" });
-    searchString = encodeURIComponent(e.selectionText);
-    searchType = "show"
-}});
+    chrome.storage.local.set({ search: encodeURIComponent(e.selectionText), type: "show" },
+    () => {
+      chrome.tabs.create({ url: "results.html" })
+    });
+  }
+});
 
 chrome.contextMenus.create({
-  id: "search-movie",
   title: "Search by MOVIE title",
   contexts:["selection"],
   onclick: function(e) {
-    searchString = encodeURIComponent(e.selectionText);
-    searchType = "movie"
-    chrome.tabs.create({ url: "results.html" });
+    chrome.storage.local.set({ search: encodeURIComponent(e.selectionText), type: "movie" },
+    () => {
+      chrome.tabs.create({ url: "results.html" })
+    });
   }
 });
 
