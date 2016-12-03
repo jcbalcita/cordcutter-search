@@ -2,8 +2,8 @@ body {
   font-family: 'Open Sans', sans-serif;
   margin: 0 auto;
   font-size: 16px;
-  background-color: #080808;
-  color: #FFFACD;
+  background-color: white;
+  color: black;
   width: 200px;
 }
 
@@ -16,26 +16,28 @@ body {
 }
 
 .set-button {
+  font-size: 14px;
   background-color: #D3D3D3;
   color: black;
   padding: 5px;
   margin: 0;
-  border: 1px solid black;
   width: 90px;
+  border: none;
 }
 
 .set-button-selected {
+  font-size: 14px;
   font-weight: 700;
   color: black;
-  background-color: #FFFFF0;
+  background-color: white;
   width: 90px;
   padding: 5px;
   margin: 0;
   cursor: default;
+  border-bottom: 5px solid #FFD700;
 }
 
 .set-button:hover {
   font-weight: 700;
-  text-decoration: underline;
   cursor: pointer;
 }
