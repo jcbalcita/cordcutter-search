@@ -31,7 +31,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   form.addEventListener("submit", e => {
     e.preventDefault();
-    chrome.storage.local.set({ search: input.value },
+    chrome.storage.local.set({ search: encodeURIComponent(input.value) },
     () => chrome.tabs.create({ url: "results.html" }));
   });
 });
