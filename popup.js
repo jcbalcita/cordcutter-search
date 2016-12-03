@@ -11,6 +11,9 @@ document.addEventListener("DOMContentLoaded", () => {
     } else if (data.type === "show") {
       showButton.className = "set-button-selected";
       movieButton.className = "set-button";
+    } else {
+      chrome.storage.local.set({ type: "movie" },
+      () => movieButton.className = "set-button-selected");
     }
   });
 
