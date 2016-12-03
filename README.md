@@ -10,7 +10,7 @@ A Chrome extension that allows users, via the [GuideBox API](http://www.guidebox
 - [x] Allows user to check if a specific season of a show is available for streaming.
 - [x] Provides links to watch specific episodes.
 
-## Funcationality
+## Functionality
 
 Cordcutter Search provides its users with an easy, convenient way to find out if a show is available for streaming.
 
