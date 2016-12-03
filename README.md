@@ -90,12 +90,12 @@ The detail page displays a list of where the show is available for streaming gen
 
 The detail page is the most complex portion of the extension and contains multiple API calls due to the way show information is stored by the GuideBox API.
 - Get show by ID
-  - Retrieves movie poster, title, and other gneral information
+  * Retrieves movie poster, title, and other general information
 - Available streaming sources for the show generally
-  - Retrieves available source names (contains no other information)
+  * Retrieves available source names (contains no other information)
 - Number of seasons
-  - Retrieves the season numbers for the seasons available for streaming.
-  - A button is created for each season with an `onclick` function that fires off an API call using the show's ID and the season number.
+  * Retrieves the season numbers for the seasons available for streaming.
+  * A button is created for each season with an `onclick` function that fires off an API call using the show's ID and the season number.
 - Once the season button is clicked, it fires off another API call that displays a list of episodes containing links to watch that specific episode.
 
 ```javascript
