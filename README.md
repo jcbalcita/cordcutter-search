@@ -78,7 +78,7 @@ Users can also search by highlighting text on the page, then right-clicking to a
 
 ### Search results
 
-Results of the search are displayed in a new tab.  Each item in the list is an "<li>" element with an `onclick` function that fires off an API call to retreive information on that particular show.
+Results of the search are displayed in a new tab.  Each item in the list is an `<li>` element with an `onclick` function that fires off an API call to retreive information on that particular show.
 
 ![alt text](http://res.cloudinary.com/jcbalcita/image/upload/v1480654395/Screen_Shot_2016-12-01_at_20.52.26_hgjapp.png)
 
