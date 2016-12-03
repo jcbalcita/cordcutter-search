@@ -4,9 +4,19 @@
     <meta charset="utf-8">
     <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,700" rel="stylesheet">
     <link rel="stylesheet" type="text/css" href="popup.css">
+    <script src="popup.js"></script>
     <title>Where can I stream it?</title>
   </head>
   <body>
-    Highlight a movie or TV show title, then use right click to find out where it's streaming!
+    <div class="set-button-container">
+      <div id="set-movie" class="set-button">MOVIE</div>
+      <div id="set-show" class="set-button">SHOW</div>
+    </div>
+
+    <form id="search-form">
+      <input id="search-input" type="text" name="" value="">
+      <input type="submit" value="Search">
+    </form>
+
   </body>
 </html>

@@ -1,7 +1,6 @@
 //*********************************************************************
 // READY SIGNAL
 //*********************************************************************
-
 document.addEventListener("DOMContentLoaded", () => {
   chrome.storage.local.get(["search", "type"], data => {
     data.type === "movie" ? searchForMovie(data.search) : searchForShow(data.search)

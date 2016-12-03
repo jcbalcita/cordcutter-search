@@ -1,0 +1,34 @@
+document.addEventListener("DOMContentLoaded", () => {
+  const movieButton = document.getElementById("set-movie")
+  const showButton = document.getElementById("set-show")
+  const form = document.getElementById("search-form");
+  const input = document.getElementById("search-input")
+
+  chrome.storage.local.get("type", data => {
+    if (data.type === "movie") {
+      movieButton.className = "set-button-selected";
+      showButton.className = "set-button";
+    } else if (data.type === "show") {
+      showButton.className = "set-button-selected";
+      movieButton.className = "set-button";
+    }
+  });
+
+  movieButton.onclick = function() {
+    chrome.storage.local.set({ type: "movie" });
+    this.className = "set-button-selected";
+    showButton.className = "set-button";
+  }
+
+  showButton.onclick = function() {
+    chrome.storage.local.set({ type: "show" });
+    this.className = "set-button-selected";
+    movieButton.className = "set-button";
+  }
+
+  form.addEventListener("submit", e => {
+    e.preventDefault();
+    chrome.storage.local.set({ search: input.value },
+    () => chrome.tabs.create({ url: "results.html" }));
+  });
+});

@@ -1,7 +1,41 @@
 body {
   font-family: 'Open Sans', sans-serif;
   margin: 0 auto;
-  font-weight: 700;
-  padding: 30px;
+  font-size: 16px;
+  background-color: #080808;
+  color: #FFFACD;
   width: 200px;
+}
+
+#search-form {
+  padding: 20px;
+}
+
+.set-button-container {
+  display: flex;
+}
+
+.set-button {
+  background-color: #D3D3D3;
+  color: black;
+  padding: 5px;
+  margin: 0;
+  border: 1px solid black;
+  width: 90px;
+}
+
+.set-button-selected {
+  font-weight: 700;
+  color: black;
+  background-color: #FFFFF0;
+  width: 90px;
+  padding: 5px;
+  margin: 0;
+  cursor: default;
+}
+
+.set-button:hover {
+  font-weight: 700;
+  text-decoration: underline;
+  cursor: pointer;
 }
