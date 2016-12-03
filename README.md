@@ -94,8 +94,8 @@ The detail page is the most complex portion of the extension and contains multip
 - Get streaming sources for the show generally
   * Returns available source names (contains no other information)
 - Get number of seasons
-  * Returns the season numbers for the seasons available for streaming.
-  * A button is created for each season with an `onclick` function that fires off an API call using the show's ID and the season number.
+  * Returns the season numbers for the seasons available for streaming
+  * A button is created for each season with an `onclick` function that fires off an API call using the show's ID and the season number
 
 Once the season button is clicked, it fires off another API call that displays a list of episodes containing links to watch that specific episode.
 
