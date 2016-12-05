@@ -11,6 +11,11 @@ body {
   padding: 20px;
 }
 
+#errors {
+  color: red;
+  font-size: 10px;
+}
+
 .set-button-container {
   display: flex;
 }

@@ -31,7 +31,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
   form.addEventListener("submit", e => {
     e.preventDefault();
-    chrome.storage.local.set({ search: encodeURIComponent(input.value) },
-    () => chrome.tabs.create({ url: "results.html" }));
+    errors = document.getElementById("errors")
+
+    if (input.value.length > 75) {
+      errors.textContent = "Search string is too long."
+    } else if (input.value) {
+      errors.textContent = ""
+      chrome.storage.local.set({ search: encodeURIComponent(input.value) },
+      () => chrome.tabs.create({ url: "results.html" }));
+    } else {
+      errors.textContent = "Search field can't be blank."
+    }
   });
 });
