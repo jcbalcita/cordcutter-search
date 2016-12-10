@@ -12,8 +12,8 @@ document.addEventListener("DOMContentLoaded", () => {
       showButton.className = "set-button-selected";
       movieButton.className = "set-button";
     } else {
-      chrome.storage.local.set({ type: "movie" }, (),
-      () => movieButton.className = "set-button-selected");
+      chrome.storage.local.set({ type: "movie" });
+      movieButton.className = "set-button-selected";
     }
   });
 
@@ -33,7 +33,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   form.addEventListener("submit", e => {
     e.preventDefault();
-    errors = document.getElementById("errors")
+    const errors = document.getElementById("errors")
 
     if (input.value) {
       errors.textContent = ""

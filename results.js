@@ -177,7 +177,6 @@ function createSeasonList(showId, seasonNumbers) {
   if (seasonNumbers.length === 0) {
     return null;
   }
-  const seasonDetail = document.getElementById("season-detail");
   seasonNumbers.forEach(seasonNum => newSeasonListItem(showId, seasonNum))
 }
 
