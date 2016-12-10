@@ -30,7 +30,7 @@ chrome.contextMenus.create({
   title: "Search by SHOW title",
   contexts:["selection"],
   onclick: function(e) {
-    chrome.storage.local.set({ search: encodeURIComponent(e.selectionText), type: "show" },
+    chrome.storage.local.set({ search: encodeURIComponent(e.selectionText.slice(0, 75)), type: "show" },
     () => chrome.tabs.create({ url: "results.html" }));
   }
 });
@@ -39,22 +39,24 @@ chrome.contextMenus.create({
   title: "Search by MOVIE title",
   contexts:["selection"],
   onclick: function(e) {
-    chrome.storage.local.set({ search: encodeURIComponent(e.selectionText), type: "movie" },
+    chrome.storage.local.set({ search: encodeURIComponent(e.selectionText.slice(0, 75)), type: "movie" },
     () => chrome.tabs.create({ url: "results.html" }));
   }
 });
 
 // popup.js
 movieButton.onclick = function() {
-  chrome.storage.local.set({ type: "movie" });
-  this.className = "set-button-selected";
-  showButton.className = "set-button";
+  chrome.storage.local.set({ type: "movie" }, () => {
+    this.className = "set-button-selected";
+    showButton.className = "set-button";
+  });
 }
 
 showButton.onclick = function() {
-  chrome.storage.local.set({ type: "show" });
-  this.className = "set-button-selected";
-  movieButton.className = "set-button";
+  chrome.storage.local.set({ type: "show" }, () => {
+    this.className = "set-button-selected";
+    movieButton.className = "set-button";
+  });
 }
 
 form.addEventListener("submit", e => {

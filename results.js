@@ -167,7 +167,6 @@ function iterEpisodeSources(sources, type, episodeLi) {
       let titleType = type === "purchase" ? `$${source.formats[0].price}` : texts[type]
       let link = document.createElement("a");
         link.href = source.link;
-        link.target = "_blank";
         link.textContent = `${source.display_name} ${titleType}`;
       episodeLi.appendChild(link);
     });
@@ -249,7 +248,6 @@ function addSource(source, sourceList) {
   const a = document.createElement("a");
     a.href = source.link;
     a.className = "source-link";
-    a.target = "_blank";
   li.appendChild(a);
 
     if (hasLogo.includes(source.display_name)) {
