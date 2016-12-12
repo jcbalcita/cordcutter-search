@@ -3,7 +3,7 @@
 
   "name": "Cordcutter Search",
   "description": "For cordcutters who need to know - 'where can I stream it?'",
-  "version": "0.77",
+  "version": "0.78",
   "background": {
     "scripts": ["background.js"]
   },

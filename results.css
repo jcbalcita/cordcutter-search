@@ -39,7 +39,6 @@ a {
 
 #general-sources {
   margin: 0 auto;
-  padding-left: 10px;
   max-width: 600px;
   min-width: 400px;
   text-align: center;
@@ -47,7 +46,6 @@ a {
 
 #season-detail {
   margin: 0 auto;
-  padding-left: 10px;
   max-width: 600px;
   min-width: 400px;
   text-align: center;
@@ -59,6 +57,9 @@ a {
   flex-direction: row;
   justify-content: center;
   flex-wrap: wrap;
+  margin: 0 auto;
+  padding: 0;
+  text-align: center;
 }
 
 #episode-list {
