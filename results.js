@@ -128,28 +128,28 @@ function appendGeneralSource(source) {
 // TV SHOW EPISODES
 //*********************
 function createEpisodeList(results) {
-  const episodes = document.getElementById("episode-list");
+  const episodeList = document.getElementById("episode-list");
   if (results.length === 0) {
-    episodes.textContent = "No episode information for this season. Sorry about that."
+    episodeList.textContent = "No episode information for this season. Sorry about that."
   } else {
-    results.forEach(episode => newEpisodeItem(episode, episodes));
+    results.forEach(episode => newEpisodeItem(episode, episodeList));
   }
 }
 
-function newEpisodeItem(episode, episodes) {
+function newEpisodeItem(episode, episodeList) {
   const episodeLi = document.createElement("li");
     episodeLi.className = "episode-item";
 
   const episodeTitle = newSpan(`Episode ${episode.episode_number}:  ${episode.original_title}`)
   const linebreak = document.createElement("br");
-    episodeLi.appendChild(episodeTitle);
+  episodeLi.appendChild(episodeTitle);
 
   iterEpisodeSources(episode.free_web_sources, "free", episodeLi)
   iterEpisodeSources(episode.subscription_web_sources, "subscription", episodeLi)
   iterEpisodeSources(episode.tv_everywhere_web_sources, "tv_everywhere", episodeLi)
   iterEpisodeSources(episode.purchase_web_sources, "purchase", episodeLi)
 
-  episodes.insertBefore(episodeLi, episodes.firstChild);
+  episodeList.insertBefore(episodeLi, episodeList.firstChild);
 }
 
 function iterEpisodeSources(sources, type, episodeLi) {

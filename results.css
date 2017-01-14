@@ -18,6 +18,9 @@ a {
   color: #B0E0E6;
 }
 
+#results {
+  text-align: center;
+}
 
 #initial-results-ul {
   padding: 0;

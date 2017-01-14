@@ -2,7 +2,7 @@
   "manifest_version": 2,
 
   "name": "Cordcutter Search",
-  "description": "For cordcutters who need to know - 'where can I stream it?'",
+  "description": "For cordcutters who need to know - 'where can I stream it?' Get direct streaming links for TV shows and movies where available.",
   "version": "0.78",
   "background": {
     "scripts": ["background.js"]
