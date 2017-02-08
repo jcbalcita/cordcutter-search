@@ -8,12 +8,15 @@ document.addEventListener("DOMContentLoaded", () => {
     if (data.type === "movie") {
       movieButton.className = "set-button-selected";
       showButton.className = "set-button";
+      focus(input);
     } else if (data.type === "show") {
       showButton.className = "set-button-selected";
       movieButton.className = "set-button";
+      focus(input);
     } else {
       chrome.storage.local.set({ type: "movie" });
       movieButton.className = "set-button-selected";
+      focus(input);
     }
   });
 
@@ -21,6 +24,7 @@ document.addEventListener("DOMContentLoaded", () => {
     chrome.storage.local.set({ type: "movie" }, () => {
       this.className = "set-button-selected";
       showButton.className = "set-button";
+      focus(input);
     });
   }
 
@@ -28,6 +32,7 @@ document.addEventListener("DOMContentLoaded", () => {
     chrome.storage.local.set({ type: "show" }, () => {
       this.className = "set-button-selected";
       movieButton.className = "set-button";
+      focus(input);
     });
   }
 
@@ -44,3 +49,8 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 });
+
+function focus(inputForm) {
+  inputForm.focus();
+  inputForm.select();
+}
