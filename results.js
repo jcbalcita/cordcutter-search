@@ -1,15 +1,10 @@
-//*********************************************************************
-// READY SIGNAL
-//*********************************************************************
 document.addEventListener("DOMContentLoaded", () => {
   chrome.storage.local.get(["search", "type"], data => {
     data.type === "movie" ? searchForMovie(data.search) : searchForShow(data.search)
   });
 });
 
-//*********************************************************************
-// INITIAL SEARCH
-//*********************************************************************
+// Processes response to initial API call for matching TV show titles.
 function processShowResults(results) {
   if (results.length > 0) {
     results.forEach(show => appendShowItem(show));
@@ -18,6 +13,7 @@ function processShowResults(results) {
   }
 }
 
+// Processes response to initial API call for matching movie titles.
 function processMovieResults(results) {
   if (results.length > 0) {
     results.forEach(movie => appendMovieItem(movie));
@@ -72,9 +68,7 @@ function newSpan(content) {
   return span;
 }
 
-//*********************************************************************
-// SHOW/MOVIE DETAIL
-//*********************************************************************
+// Renders `show` page for an individual TV show.
 function displayShowDetail(show) {
   addPoster(show.artwork_304x171);
   addTitle(show.title, show.first_aired.slice(0, 4));
@@ -82,6 +76,7 @@ function displayShowDetail(show) {
   getNumberOfSeasons(show.id);
 }
 
+// Renders `show` page for an individual movie.
 function displayMovieDetail(movie) {
   addPoster(movie.poster_240x342);
   addTitle(movie.title, movie.release_year);
@@ -97,9 +92,7 @@ function displayMovieDetail(movie) {
 }
 
 
-//************************
-// TV SHOW GENERAL CONTENT
-//************************
+// Displays sources on which at least one episode of the TV show is available for streaming.
 function receiveGeneralContent(generalContent) {
   const generalSources = document.getElementById("general-sources");
 
@@ -124,9 +117,7 @@ function appendGeneralSource(source) {
     }
 }
 
-//*********************
-// TV SHOW EPISODES
-//*********************
+// Displays links to specific episodes after a season button is clicked.
 function createEpisodeList(results) {
   const episodeList = document.getElementById("episode-list");
   if (results.length === 0) {
@@ -194,9 +185,7 @@ function newSeasonListItem(showId, seasonNum) {
   seasonList.appendChild(li);
 }
 
-//*********************
-// MOVIE SOURCES
-//*********************
+// Displays links to streams of an individual movie.
 function noSources(movie) {
   if (movie.free_web_sources.length === 0 &&
       movie.subscription_web_sources.length === 0 &&
@@ -217,6 +206,7 @@ function addFreeSources(freeSources) {
   }
 }
 
+// Adds "sub" sources, i.e. sources that require a subscription.
 function addSubSources(subSources) {
   if (subSources.length === 0) {
     return null;
@@ -229,6 +219,7 @@ function addSubSources(subSources) {
   }
 }
 
+// Adds "TV everywhere" sources, i.e. sources that require an account with a cable or satellite TV service.
 function addTVESources(tveSources) {
   if (tveSources.length === 0) {
     return null;
@@ -273,9 +264,7 @@ function newSourceList(type) {
   return ul;
 }
 
-//****************************
-// SHOW/MOVIE SHARED FUNCTIONS
-//****************************
+// TV/Movie shared functions: more code to be DRY'd and added here.
 function addTitle(title, year) {
   const detail = document.getElementById("item-detail");
   const yearString = year.toString();
