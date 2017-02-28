@@ -3,19 +3,31 @@
   <head>
     <meta charset="utf-8">
     <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,700" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.98.0/css/materialize.min.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link rel="stylesheet" type="text/css" href="popup.css">
     <script src="popup.js"></script>
     <title>Where can I stream it?</title>
   </head>
   <body>
     <div class="set-button-container">
-      <div id="set-movie" class="set-button">MOVIE</div>
-      <div id="set-show" class="set-button">SHOW</div>
+      <div class="set-button">
+        <button id="set-movie" class="btn-large waves-effect waves-light light-blue" type="button" name="MOVIE">
+          MOVIE
+        </button>
+      </div>
+      <div>
+        <button id="set-show" class="btn-large waves-effect waves-light light-blue" type="button" name="SHOW">
+          SHOW
+        </button>
+      </div>
     </div>
 
     <form id="search-form">
-      <input id="search-input" type="text" name="" value="">
-      <input id="submit-button" type="submit" value="Search">
+      <div class="input-field">
+        <i class="material-icons">search</i>
+        <input id="search-input" type="text" name="" placeholder="Enter search here.">
+      </div>
       <div id="errors"></div>
     </form>
 

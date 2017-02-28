@@ -1,33 +1,9 @@
-html, body, h1, h4, ul, li, main, div {
-  font-family: 'Open Sans', sans-serif;
-  margin: 0 auto;
-  font-size: 16px;
-  background-color: #080808;
-  color: #FFFACD;
-}
-
-h1 {
-  margin-bottom: 30px;
-}
-
-ul {
-  list-style: none;
-}
-
-a {
-  color: #B0E0E6;
-}
-
-#results {
-  text-align: center;
-}
-
-#initial-results-ul {
+/*#initial-results-ul {
   padding: 0;
   margin: 0 auto;
   max-width: 600px;
   min-width: 400px;
-}
+}*/
 
 #sources {
   padding: 0;

@@ -6,32 +6,29 @@ document.addEventListener("DOMContentLoaded", () => {
 
   chrome.storage.local.get("type", data => {
     if (data.type === "movie") {
-      movieButton.className = "set-button-selected";
-      showButton.className = "set-button";
-      focus(input);
+      movieButton.classList.remove("lighten-4");
+      showButton.classList.add("lighten-4");
     } else if (data.type === "show") {
-      showButton.className = "set-button-selected";
-      movieButton.className = "set-button";
-      focus(input);
+      showButton.classList.remove("lighten-4");
+      movieButton.classList.add("lighten-4");
     } else {
       chrome.storage.local.set({ type: "movie" });
-      movieButton.className = "set-button-selected";
-      focus(input);
+      movieButton.classList.remove("lighten-4");
     }
   });
 
   movieButton.onclick = function() {
     chrome.storage.local.set({ type: "movie" }, () => {
-      this.className = "set-button-selected";
-      showButton.className = "set-button";
+      this.classList.remove("lighten-4");
+      showButton.classList.add("lighten-4");
       focus(input);
     });
   }
 
   showButton.onclick = function() {
     chrome.storage.local.set({ type: "show" }, () => {
-      this.className = "set-button-selected";
-      movieButton.className = "set-button";
+      this.classList.remove("lighten-4");
+      movieButton.classList.add("lighten-4");
       focus(input);
     });
   }
@@ -48,9 +45,11 @@ document.addEventListener("DOMContentLoaded", () => {
       errors.textContent = "Search field can't be blank."
     }
   });
-});
 
-function focus(inputForm) {
-  inputForm.focus();
-  inputForm.select();
-}
+  focus(input);
+
+  function focus(inputForm) {
+    inputForm.select();
+    inputForm.focus();
+  }  
+});

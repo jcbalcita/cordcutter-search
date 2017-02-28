@@ -3,9 +3,12 @@
 
   "name": "Cordcutter Search",
   "description": "For cordcutters who need to know - 'where can I stream it?' Get direct streaming links for TV shows and movies where available.",
-  "version": "0.85",
+  "version": "1.0",
   "background": {
-    "scripts": ["background.js"]
+    "scripts": [
+      "background.js",
+      "https://cdnjs.cloudflare.com/ajax/libs/materialize/0.98.0/js/materialize.min.js",
+    ]
   },
   "browser_action": {
     "default_icon": "assets/icon128.png",
