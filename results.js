@@ -23,7 +23,7 @@ function processMovieResults(results) {
 }
 
 function appendShowItem(show) {
-  const resultEl = document.getElementById("initial-results-ul");
+  const resultEl = document.getElementById("initial-results");
   let image = document.createElement("img");
     image.src = show.artwork_208x117;
   let listItem = newListItem("initial");
@@ -40,15 +40,18 @@ function appendShowItem(show) {
 }
 
 function appendMovieItem(movie) {
-  const resultEl = document.getElementById("initial-results-ul");
-  let img = document.createElement("img");
-    img.src = movie.poster_120x171;
-  let listItem = newListItem("initial");
-    listItem.dataset.id = movie.id;
-    listItem.onclick = function() {
-      resultEl.textContent = "";
-      getMovieById(movie.id);
-    }
+  const resultEl = document.getElementById("initial-results");
+
+  const img = document.createElement("img");
+  img.src = movie.poster_120x171;
+  img.classList.add("square");
+
+  const listItem = newListItem("initial");
+  listItem.classList.add("collection-item", "avatar");
+  listItem.onclick = function() {
+    resultEl.textContent = "";
+    getMovieById(movie.id);
+  }
 
   listItem.appendChild(img);
   listItem.appendChild(newSpan(`${movie.title} (${movie.release_year})`));
@@ -57,14 +60,15 @@ function appendMovieItem(movie) {
 }
 
 function newListItem(type) {
-  const li = document.createElement("li");
-  li.className = type === "initial" ? "list-item" : "source-item";
-  return li;
+  const a = document.createElement("a");
+  a.className = type === "initial" ? "list-item" : "source-item";
+  return a;
 }
 
 function newSpan(content) {
   const span = document.createElement("span");
   span.textContent = content;
+  span.classList.add("title", "right");
   return span;
 }
 
