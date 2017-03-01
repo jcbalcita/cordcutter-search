@@ -149,7 +149,7 @@ function newEpisodeItem(episode, episodeList) {
   iterEpisodeSources(episode.tv_everywhere_web_sources, "tv_everywhere", episodeBody)
   iterEpisodeSources(episode.purchase_web_sources, "purchase", episodeBody)
 
-  episodeList.appendChild(episodeLi);
+  episodeList.insertBefore(episodeLi, episodeList.firstChild);
 }
 
 function iterEpisodeSources(sources, type, episodeBody) {
