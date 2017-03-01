@@ -1,0 +1,61 @@
+#results {
+  max-width: 720px;
+}
+
+.chip:hover {
+  box-shadow: 1px 1px 1px gray;
+  cursor: pointer;
+}
+
+html, div, span, img {
+  color: black;
+  margin: 0 auto;
+}
+
+h4 {
+  font-weight: 700;
+}
+
+a {
+  font-size: 16px;
+  padding: 5px;
+}
+
+img {
+  border: 1px solid black;
+}
+
+p {
+  margin: 5px auto;
+  display: inline-block;
+  padding-left: 10px;
+  padding-right: 10px;
+}
+
+.source-link:hover {
+  text-decoration: underline;
+}
+
+.logo {
+  width: 90px;
+}
+
+.list-item:hover {
+  cursor: pointer;
+}
+
+.source-item, .source-link {
+  display: inline-block;
+}
+
+#initial-results {
+  width: 600px;
+  margin: 10px auto;
+}
+
+span {
+  max-width: 250px;
+  margin: 20px;
+  text-align: right;
+  word-wrap: break-word;
+}

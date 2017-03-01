@@ -36,6 +36,8 @@ function appendShowItem(show) {
       getShowById(show.id);
     }
 
+    listItem.classList.add("collection-item", "avatar");
+
   resultEl.appendChild(listItem);
 }
 
@@ -103,7 +105,7 @@ function receiveGeneralContent(generalContent) {
   if (generalContent.length === 0) {
     generalSources.textContent = "We were uanble to find any non-purchase streams for this show."
   } else {
-    let linebreak = document.createElement("br");
+    const linebreak = document.createElement("br");
     generalSources.textContent = `This show is available for streaming on the below platforms. For specific information and links, select a season.`
     generalSources.appendChild(linebreak);
     generalContent.forEach(source => appendGeneralSource(source));
@@ -111,8 +113,8 @@ function receiveGeneralContent(generalContent) {
 }
 
 function appendGeneralSource(source) {
-    p = document.createElement("p");
-    let type = source.type === "tv_everywhere" ? "Cable/Dish Login Required" : source.type
+    const p = document.createElement("p");
+    const type = source.type === "tv_everywhere" ? "Cable/Dish Login Required" : source.type
     p.innerHTML = `${source.display_name.bold()}  (${type})`;
 
     if (type !== "purchase") {
@@ -155,14 +157,13 @@ function iterEpisodeSources(sources, type, episodeLi) {
   }
 
   if (sources.length === 0) {
-    return
+    return;
   } else {
-
     sources.forEach(source => {
       let titleType = type === "purchase" ? `$${source.formats[0].price}` : texts[type]
       let link = document.createElement("a");
-        link.href = source.link;
-        link.textContent = `${source.display_name} ${titleType}`;
+      link.href = source.link;
+      link.textContent = `${source.display_name} ${titleType}`;
       episodeLi.appendChild(link);
     });
   }
@@ -177,16 +178,16 @@ function createSeasonList(showId, seasonNumbers) {
 
 function newSeasonListItem(showId, seasonNum) {
   const seasonList = document.getElementById("season-list")
-  const li = document.createElement("li");
-    li.className = "season-list-item";
-    li.onclick = function() {
+  const div = document.createElement("div");
+    div.className = "chip";
+    div.onclick = function() {
       const episodes = document.getElementById("episode-list");
         episodes.textContent = "";
       getSeasonInfo(showId, seasonNum);
     }
-    li.textContent = `Season ${seasonNum}`
+    div.textContent = `Season ${seasonNum}`
 
-  seasonList.appendChild(li);
+  seasonList.appendChild(div);
 }
 
 // Displays links to streams of an individual movie.
@@ -259,11 +260,11 @@ function addSource(source, sourceList) {
 function newSourceList(type) {
   const sources = document.getElementById("sources")
   const ul = document.createElement("ul");
-    ul.className = "source-list";
-  const h4 = document.createElement("h4");
-    h4.textContent = type;
+  //  ul.classList.add("col", "s6");
+  const h5 = document.createElement("h5");
+   h5.textContent = type;
 
-  ul.appendChild(h4);
+  ul.appendChild(h5);
   sources.appendChild(ul);
   return ul;
 }
@@ -272,18 +273,18 @@ function newSourceList(type) {
 function addTitle(title, year) {
   const detail = document.getElementById("item-detail");
   const yearString = year.toString();
-  const h3 = document.createElement("h3");
-    h3.textContent = `${title}  (${yearString})`
-    h3.className = "movie-title"
+  const h4 = document.createElement("h4");
+    h4.textContent = `${title}  (${yearString})`
+    h4.classList.add("movie-title", "center");
 
-  detail.appendChild(h3);
+  detail.appendChild(h4);
 }
 
 function addPoster(poster) {
   const detail = document.getElementById("item-detail");
-  let img = document.createElement("img");
+  const img = document.createElement("img");
     img.src = poster;
-    img.className = "poster"
+    img.classList.add("center");
 
   detail.appendChild(img);
 }
