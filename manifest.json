@@ -3,7 +3,7 @@
 
   "name": "Cordcutter Search",
   "description": "For cordcutters who need to know - 'where can I stream it?' Get direct streaming links for TV shows and movies where available.",
-  "version": "1.0",
+  "version": "1.05",
   "background": {
     "scripts": [
       "background.js"
