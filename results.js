@@ -155,7 +155,7 @@ function newEpisodeItem(episode, episodeList) {
 function iterEpisodeSources(sources, type, episodeBody) {
   const texts = {
     "free": "(free)",
-    "subscription": "(sub)",
+    "subscription": "(subscription)",
     "tv_everywhere": "(login required)",
   }
 
@@ -183,7 +183,7 @@ function createSeasonList(showId, seasonNumbers) {
 function newSeasonListItem(showId, seasonNum) {
   const seasonList = document.getElementById("season-list")
   const div = document.createElement("div");
-    div.className = "chip";
+    div.classList.add("chip", "blue");
     div.onclick = function() {
       const episodes = document.getElementById("episode-list");
         episodes.textContent = "";
@@ -208,6 +208,7 @@ function addFreeSources(freeSources) {
     return null;
   } else {
     const ul = newSourceList("Free:");
+     ul.classList.add("collection-item")
 
     freeSources.forEach(source => {
       addSource(source, ul);
@@ -221,6 +222,7 @@ function addSubSources(subSources) {
     return null;
   } else {
     const ul = newSourceList("Subscription:");
+     ul.classList.add("collection-item");
 
     subSources.forEach(source => {
       addSource(source, ul);
@@ -234,6 +236,7 @@ function addTVESources(tveSources) {
     return null;
   } else {
     const ul = newSourceList("Cable/Dish Login Required:");
+     ul.classList.add("collection-item");
 
     tveSources.forEach(source => {
       addSource(source, ul);

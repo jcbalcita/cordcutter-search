@@ -2,6 +2,10 @@
   max-width: 720px;
 }
 
+.chip {
+  color: white;
+}
+
 .chip:hover {
   box-shadow: 1px 1px 1px gray;
   cursor: pointer;
@@ -16,9 +20,18 @@ h4 {
   font-weight: 700;
 }
 
+h5 {
+  font-size: 18px;
+  font-weight: bold;
+}
+
 a {
   font-size: 16px;
   padding: 5px;
+}
+
+a:hover {
+  font-style: underline;
 }
 
 img {
@@ -58,4 +71,8 @@ span {
   margin: 20px;
   text-align: right;
   word-wrap: break-word;
+}
+
+.episode-link {
+  display: block;
 }
