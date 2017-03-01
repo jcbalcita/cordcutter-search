@@ -135,21 +135,24 @@ function createEpisodeList(results) {
 
 function newEpisodeItem(episode, episodeList) {
   const episodeLi = document.createElement("li");
-    episodeLi.className = "episode-item";
+  const episodeHeader = document.createElement("div");
+   episodeHeader.className = "collapsible-header";
+   episodeHeader.textContent = `Episode ${episode.episode_number}:  ${episode.original_title}`
+  const episodeBody = document.createElement("div");
+   episodeBody.className = "collapsible-body";
 
-  const episodeTitle = newSpan(`Episode ${episode.episode_number}:  ${episode.original_title}`)
-  const linebreak = document.createElement("br");
-  episodeLi.appendChild(episodeTitle);
+  episodeLi.appendChild(episodeHeader);
+  episodeLi.appendChild(episodeBody);
 
-  iterEpisodeSources(episode.free_web_sources, "free", episodeLi)
-  iterEpisodeSources(episode.subscription_web_sources, "subscription", episodeLi)
-  iterEpisodeSources(episode.tv_everywhere_web_sources, "tv_everywhere", episodeLi)
-  iterEpisodeSources(episode.purchase_web_sources, "purchase", episodeLi)
+  iterEpisodeSources(episode.free_web_sources, "free", episodeBody)
+  iterEpisodeSources(episode.subscription_web_sources, "subscription", episodeBody)
+  iterEpisodeSources(episode.tv_everywhere_web_sources, "tv_everywhere", episodeBody)
+  iterEpisodeSources(episode.purchase_web_sources, "purchase", episodeBody)
 
-  episodeList.insertBefore(episodeLi, episodeList.firstChild);
+  episodeList.appendChild(episodeLi);
 }
 
-function iterEpisodeSources(sources, type, episodeLi) {
+function iterEpisodeSources(sources, type, episodeBody) {
   const texts = {
     "free": "(free)",
     "subscription": "(sub)",
@@ -162,9 +165,10 @@ function iterEpisodeSources(sources, type, episodeLi) {
     sources.forEach(source => {
       let titleType = type === "purchase" ? `$${source.formats[0].price}` : texts[type]
       let link = document.createElement("a");
-      link.href = source.link;
-      link.textContent = `${source.display_name} ${titleType}`;
-      episodeLi.appendChild(link);
+       link.className = "episode-link";
+       link.href = source.link;
+       link.textContent = `${source.display_name} ${titleType}`;
+      episodeBody.appendChild(link);
     });
   }
 }
