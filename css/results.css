@@ -31,7 +31,7 @@ a {
 }
 
 a:hover {
-  font-style: underline;
+  text-decoration: underline;
 }
 
 img {
