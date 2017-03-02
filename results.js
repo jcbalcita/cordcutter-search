@@ -126,6 +126,7 @@ function appendGeneralSource(source) {
 // Displays links to specific episodes after a season button is clicked.
 function createEpisodeList(results) {
   const episodeList = document.getElementById("episode-list");
+   episodeList.classList.add("collapsible");
   if (results.length === 0) {
     episodeList.textContent = "No episode information for this season. Sorry about that."
   } else {
@@ -266,8 +267,8 @@ function addSource(source, sourceList) {
 
 function newSourceList(type) {
   const sources = document.getElementById("sources")
+   sources.classList.add("collection");
   const ul = document.createElement("ul");
-  //  ul.classList.add("col", "s6");
   const h5 = document.createElement("h5");
    h5.textContent = type;
 
@@ -348,6 +349,7 @@ function getShowById(id) {
   xhr.onload = function () {
     if (xhr.readyState === xhr.DONE) {
       if (xhr.status === 200) {
+        console.log(id);
         displayShowDetail(xhr.response);
       }
     }
@@ -409,7 +411,8 @@ function getSeasonInfo(id, season) {
   xhr.onload = function () {
     if (xhr.readyState === xhr.DONE) {
       if (xhr.status === 200) {
-        createEpisodeList(xhr.response.results)
+        console.log(xhr.response.results);
+        createEpisodeList(xhr.response.results);
       }
     }
   };
