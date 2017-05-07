@@ -45,9 +45,9 @@ function appendMovieItem(movie) {
   const img = document.createElement("img");
   img.src = movie.poster_120x171;
   img.classList.add("square");
-
   const listItem = newListItem("initial");
   listItem.classList.add("collection-item", "avatar");
+
   listItem.onclick = function() {
     resultEl.textContent = "";
     getMovieById(movie.id);
@@ -55,7 +55,6 @@ function appendMovieItem(movie) {
 
   listItem.appendChild(img);
   listItem.appendChild(newSpan(`${movie.title} (${movie.release_year})`));
-
   resultEl.appendChild(listItem);
 }
 
@@ -90,10 +89,18 @@ function displayMovieDetail(movie) {
   addFreeSources(movie.free_web_sources);
   addSubSources(movie.subscription_web_sources);
   addTVESources(movie.tv_everywhere_web_sources);
+  addPurchaseSources(movie.purchase_web_sources);
 }
 
+function noSources(movie) {
+  if (movie.free_web_sources.length === 0 &&
+      movie.subscription_web_sources.length === 0 &&
+      movie.tv_everywhere_web_sources.length === 0 &&
+      movie.purchase_web_sources.length === 0) {
+    return true;
+  }
+}
 
-// Displays sources on which at least one episode of the TV show is available for streaming.
 function receiveGeneralContent(generalContent) {
   const generalSources = document.getElementById("general-sources");
 
@@ -177,14 +184,6 @@ function newSeasonListItem(showId, seasonNum) {
   seasonList.appendChild(div);
 }
 
-function noSources(movie) {
-  if (movie.free_web_sources.length === 0 &&
-      movie.subscription_web_sources.length === 0 &&
-      movie.tv_everywhere_web_sources.length === 0) {
-    return true;
-  }
-}
-
 function addFreeSources(freeSources) {
   if (freeSources.length === 0) {
     return null;
@@ -198,7 +197,6 @@ function addFreeSources(freeSources) {
   }
 }
 
-// Adds "sub" sources, i.e. sources that require a subscription.
 function addSubSources(subSources) {
   if (subSources.length === 0) {
     return null;
@@ -212,8 +210,6 @@ function addSubSources(subSources) {
   }
 }
 
-// Adds "TV everywhere" sources, i.e. sources that require an account with a
-// cable or satellite TV service.
 function addTVESources(tveSources) {
   if (tveSources.length === 0) {
     return null;
@@ -227,32 +223,46 @@ function addTVESources(tveSources) {
   }
 }
 
+function addPurchaseSources(purchaseSources) {
+  if (purchaseSources.length === 0) {
+    return null;
+  } else {
+    const ul = newSourceList("Purchase:");
+    ul.classList.add("collection-item");
+
+    purchaseSources.forEach(source => {
+      addSource(source, ul);
+    });
+  }
+}
+
 function addSource(source, sourceList) {
   const hasLogo = ["Netflix", "Amazon Prime", "Hulu"]
   const li = newListItem("source");
   const a = document.createElement("a");
-    a.href = source.link;
-    a.className = "source-link";
+  a.href = source.link;
+  a.className = "source-link";
   li.appendChild(a);
 
-    if (hasLogo.includes(source.display_name)) {
-      const img = document.createElement("img");
-        let sourceName = source.display_name.split(" ")[0].toLowerCase();
-        img.src = `assets/${sourceName}.png`;
-        img.className = "logo";
-        a.appendChild(img);
-    } else {
-      a.textContent = source.display_name
-    }
+  if (hasLogo.includes(source.display_name)) {
+    const img = document.createElement("img");
+    let sourceName = source.display_name.split(" ")[0].toLowerCase();
+    img.src = `assets/${sourceName}.png`;
+    img.className = "logo";
+    a.appendChild(img);
+  } else {
+    a.textContent = source.display_name
+  }
+
   sourceList.appendChild(li);
 }
 
 function newSourceList(type) {
   const sources = document.getElementById("sources")
-   sources.classList.add("collection");
+  sources.classList.add("collection");
   const ul = document.createElement("ul");
   const h5 = document.createElement("h5");
-   h5.textContent = type;
+  h5.textContent = type;
 
   ul.appendChild(h5);
   sources.appendChild(ul);
@@ -338,6 +348,7 @@ function getShowById(id) {
 
 function getMovieById(id) {
   const url = `${baseUrl}/movies/${id}?${apiKey}`;
+  console.log(url);
   const xhr = newXHR(url);
   xhr.onload = function () {
     if (xhr.readyState === xhr.DONE) {
