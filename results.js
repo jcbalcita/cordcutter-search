@@ -4,7 +4,6 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 });
 
-// Processes response to initial API call for matching TV show titles.
 function processShowResults(results) {
   if (results.length > 0) {
     results.forEach(show => appendShowItem(show));
@@ -13,7 +12,6 @@ function processShowResults(results) {
   }
 }
 
-// Processes response to initial API call for matching movie titles.
 function processMovieResults(results) {
   if (results.length > 0) {
     results.forEach(movie => appendMovieItem(movie));
@@ -74,15 +72,12 @@ function newSpan(content) {
   return span;
 }
 
-// Renders `show` page for an individual TV show.
 function displayShowDetail(show) {
   addPoster(show.artwork_304x171);
   addTitle(show.title, show.first_aired.slice(0, 4));
-  getGeneralShowContent(show.id);
   getNumberOfSeasons(show.id);
 }
 
-// Renders `show` page for an individual movie.
 function displayMovieDetail(movie) {
   addPoster(movie.poster_240x342);
   addTitle(movie.title, movie.release_year);
@@ -106,24 +101,11 @@ function receiveGeneralContent(generalContent) {
     generalSources.textContent = "We were uanble to find any non-purchase streams for this show."
   } else {
     const linebreak = document.createElement("br");
-    generalSources.textContent = `This show is available for streaming on the below platforms. For specific information and links, select a season.`
+    generalSources.textContent = "For specific information and links, select a season."
     generalSources.appendChild(linebreak);
-    generalContent.forEach(source => appendGeneralSource(source));
   }
 }
 
-function appendGeneralSource(source) {
-    const p = document.createElement("p");
-    const type = source.type === "tv_everywhere" ? "Cable/Dish Login Required" : source.type
-    p.innerHTML = `${source.display_name.bold()}  (${type})`;
-
-    if (type !== "purchase") {
-      const generalSources = document.getElementById("general-sources");
-      generalSources.appendChild(p);
-    }
-}
-
-// Displays links to specific episodes after a season button is clicked.
 function createEpisodeList(results) {
   const episodeList = document.getElementById("episode-list");
    episodeList.classList.add("collapsible");
@@ -195,7 +177,6 @@ function newSeasonListItem(showId, seasonNum) {
   seasonList.appendChild(div);
 }
 
-// Displays links to streams of an individual movie.
 function noSources(movie) {
   if (movie.free_web_sources.length === 0 &&
       movie.subscription_web_sources.length === 0 &&
@@ -231,7 +212,8 @@ function addSubSources(subSources) {
   }
 }
 
-// Adds "TV everywhere" sources, i.e. sources that require an account with a cable or satellite TV service.
+// Adds "TV everywhere" sources, i.e. sources that require an account with a
+// cable or satellite TV service.
 function addTVESources(tveSources) {
   if (tveSources.length === 0) {
     return null;
@@ -277,14 +259,12 @@ function newSourceList(type) {
   return ul;
 }
 
-// TV/Movie shared functions: more code to be DRY'd and added here.
 function addTitle(title, year) {
   const detail = document.getElementById("item-detail");
   const yearString = year.toString();
   const h4 = document.createElement("h4");
     h4.textContent = `${title}  (${yearString})`
     h4.classList.add("movie-title", "center");
-
   detail.appendChild(h4);
 }
 
@@ -293,26 +273,29 @@ function addPoster(poster) {
   const img = document.createElement("img");
     img.src = poster;
     img.classList.add("center");
-
   detail.appendChild(img);
 }
 
 //*********************************************************************
 // API CALL FUNCTIONS
 //*********************************************************************
+
+const baseUrl = "https://api-public.guidebox.com/v2";
+const apiKey = "api_key=rKy1Hw9qICyXezey3TcAJ2uv0bWwQkmL";
+const movieQuery = "/search?type=movie&field=title&query=";
+const showQuery = "/search?type=show&field=title&query=";
+
 function newXHR(url) {
   const xhr = new XMLHttpRequest();
   xhr.open('GET', url, true);
   xhr.responseType = 'json';
-
   return xhr;
 }
 
 function searchForShow(searchString) {
-  const url = `https://api-public.guidebox.com/v1.43/US/rKy1Hw9qICyXezey3TcAJ2uv0bWwQkmL/search/title/${searchString}`;
   document.getElementById("loading").textContent = "Loading..."
-
-  let xhr = newXHR(url);
+  const url = `${baseUrl}${showQuery}${searchString}&${apiKey}`;
+  const xhr = newXHR(url);
   xhr.onload = function () {
     if (xhr.readyState === xhr.DONE) {
       if (xhr.status === 200) {
@@ -321,14 +304,12 @@ function searchForShow(searchString) {
       }
     }
   };
-
   xhr.send();
 }
 
 function searchForMovie(searchString) {
-  const url = `https://api-public.guidebox.com/v1.43/US/rKy1Hw9qICyXezey3TcAJ2uv0bWwQkmL/search/movie/title/${searchString}`;
   document.getElementById("loading").textContent = "Loading..."
-
+  const url = `${baseUrl}${movieQuery}${searchString}&${apiKey}`;
   const xhr = newXHR(url);
   xhr.onload = function () {
     if (xhr.readyState === xhr.DONE) {
@@ -338,13 +319,11 @@ function searchForMovie(searchString) {
       }
     }
   };
-
   xhr.send();
 }
 
 function getShowById(id) {
-  const url = `https://api-public.guidebox.com/v1.43/US/rKy1Hw9qICyXezey3TcAJ2uv0bWwQkmL/show/${id}`;
-
+  const url = `${baseUrl}/shows/${id}?${apiKey}`;
   const xhr = newXHR(url);
   xhr.onload = function () {
     if (xhr.readyState === xhr.DONE) {
@@ -354,29 +333,12 @@ function getShowById(id) {
       }
     }
   };
-
-  xhr.send();
-}
-
-function getGeneralShowContent(id) {
-  const url = `https://api-public.guidebox.com/v1.43/US/rKy1Hw9qICyXezey3TcAJ2uv0bWwQkmL/show/${id}/available_content`;
-
-  const xhr = newXHR(url);
-  xhr.onload = function () {
-    if (xhr.readyState === xhr.DONE) {
-      if (xhr.status === 200) {
-        receiveGeneralContent(xhr.response.results.web.episodes.all_sources)
-      }
-    }
-  };
-
   xhr.send();
 }
 
 function getMovieById(id) {
-  const url = `https://api-public.guidebox.com/v1.43/US/rKy1Hw9qICyXezey3TcAJ2uv0bWwQkmL/movie/${id}`;
+  const url = `${baseUrl}/movies/${id}?${apiKey}`;
   const xhr = newXHR(url);
-
   xhr.onload = function () {
     if (xhr.readyState === xhr.DONE) {
       if (xhr.status === 200) {
@@ -384,14 +346,12 @@ function getMovieById(id) {
       }
     }
   };
-
   xhr.send();
 }
 
 function getNumberOfSeasons(id) {
-  const url = `https://api-public.guidebox.com/v1.43/US/rKy1Hw9qICyXezey3TcAJ2uv0bWwQkmL/show/${id}/seasons`;
+  const url = `${baseUrl}/shows/${id}/seasons?${apiKey}`;
   const xhr = newXHR(url);
-
   xhr.onload = function () {
     if (xhr.readyState === xhr.DONE) {
       if (xhr.status === 200) {
@@ -400,22 +360,18 @@ function getNumberOfSeasons(id) {
       }
     }
   };
-
   xhr.send();
 }
 
 function getSeasonInfo(id, season) {
-  const url = `https://api-public.guidebox.com/v1.43/US/rKy1Hw9qICyXezey3TcAJ2uv0bWwQkmL/show/${id}/episodes/${season}/1/25/all/web/true`;
+  const url = `${baseUrl}/shows/${id}/episodes?season=${season}&${apiKey}&include_links=true`;
   const xhr = newXHR(url);
-
   xhr.onload = function () {
     if (xhr.readyState === xhr.DONE) {
       if (xhr.status === 200) {
-        console.log(xhr.response.results);
         createEpisodeList(xhr.response.results);
       }
     }
   };
-
   xhr.send();
 }
