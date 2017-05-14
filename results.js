@@ -5,68 +5,48 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 function processShowResults(results) {
+  $("#loading").empty();
   if (results.length > 0) {
-    results.forEach(show => appendShowItem(show));
+    results.forEach(show => appendResultItem(show, "show"));
   } else {
-    document.getElementById("results").textContent = "No results found.";
+    $("#results").text("No results found.");
   }
 }
 
 function processMovieResults(results) {
+  $("#loading").empty();
   if (results.length > 0) {
-    results.forEach(movie => appendMovieItem(movie));
+    results.forEach(movie => appendResultItem(movie, "movie"));
   } else {
-    document.getElementById("results").textContent = "No results found.";
+    $("#results").text("No results found.");
   }
 }
 
-function appendShowItem(show) {
-  const resultEl = document.getElementById("initial-results");
-  const image = document.createElement("img");
-  image.src = show.artwork_208x117;
-  const listItem = newListItem("initial");
-  listItem.appendChild(image);
-  listItem.appendChild(newSpan(show.title));
+function appendResultItem(item, type) {
+  const image = $("<img/>", {"class": "square"});
+  const title = $("<span/>");
+  const listItem = $("<li/>", {
+    "class": "collection-item avatar list-item"
+  });
 
-  listItem.onclick = function() {
-    resultEl.textContent = "";
-    getShowById(show.id);
+  if (type === "movie") {
+    image.src(item.poster_120x171);
+    title.text(`${item.title} (${item.release_year})`);
+    listItem.click(() => {
+      resultEl.empty();
+      getMovieById(item.id);
+    });
+  } else if (type === "show") {
+    image.src(item.artwork_208x117);
+    title.text(item.title);
+    listItem.click(() => {
+      resultEl.empty();
+      getShowById(item.id);
+    });
   }
 
-  listItem.classList.add("collection-item", "avatar");
-  resultEl.appendChild(listItem);
-}
-
-function appendMovieItem(movie) {
-  const resultEl = document.getElementById("initial-results");
-
-  const img = document.createElement("img");
-  img.src = movie.poster_120x171;
-  img.classList.add("square");
-  const listItem = newListItem("initial");
-  listItem.classList.add("collection-item", "avatar");
-
-  listItem.onclick = function() {
-    resultEl.textContent = "";
-    getMovieById(movie.id);
-  }
-
-  listItem.appendChild(img);
-  listItem.appendChild(newSpan(`${movie.title} (${movie.release_year})`));
-  resultEl.appendChild(listItem);
-}
-
-function newListItem(type) {
-  const a = document.createElement("a");
-  a.className = type === "initial" ? "list-item" : "source-item";
-  return a;
-}
-
-function newSpan(content) {
-  const span = document.createElement("span");
-  span.textContent = content;
-  span.classList.add("title", "right");
-  return span;
+  listItem.append(image, title);
+  $("#initial-results").append(listItem);
 }
 
 function displayShowDetail(show) {
@@ -80,8 +60,8 @@ function displayMovieDetail(movie) {
   addTitle(movie.title, movie.release_year);
 
   if (noSources(movie)) {
-    const sources = document.getElementById("sources");
-    sources.textContent = "We were unable to find any non-purchase streams for this movie."
+    $("#sources").text("We were unable to find any streams for this movie.");
+    return;
   }
 
   addMovieSources(movie.free_web_sources, "free");
@@ -100,32 +80,30 @@ function noSources(movie) {
 }
 
 function createEpisodeList(results) {
-  const episodeList = document.getElementById("episode-list");
-   episodeList.classList.add("collapsible");
+  const episodeList = $("#episode-list");
+  episodeList.addClass("collapsible");
   if (results.length === 0) {
-    episodeList.textContent = "No episode information for this season. Sorry about that."
+    episodeList.text("No episode information for this season. Sorry about that.");
   } else {
     results.forEach(episode => newEpisodeItem(episode, episodeList));
   }
 }
 
 function newEpisodeItem(episode, episodeList) {
-  const episodeLi = document.createElement("li");
-  const episodeHeader = document.createElement("div");
-   episodeHeader.className = "collapsible-header";
-   episodeHeader.textContent = `Episode ${episode.episode_number}:  ${episode.original_title}`
-  const episodeBody = document.createElement("div");
-   episodeBody.className = "collapsible-body";
+  const episodeLi = $("<li/>");
+  const episodeHeader = $("<div/>", {
+    text: `Episode ${episode.episode_number}:  ${episode.original_title}`,
+    "class": "collapsible-header"
+  });
+  const episodeBody = $("<div/>", {"class": "collapsible-body"});
+  episodeLi.append(episodeHeader, episodeBody);
 
-  episodeLi.appendChild(episodeHeader);
-  episodeLi.appendChild(episodeBody);
+  iterEpisodeSources(episode.free_web_sources, "free", episodeBody);
+  iterEpisodeSources(episode.subscription_web_sources, "subscription", episodeBody);
+  iterEpisodeSources(episode.tv_everywhere_web_sources, "tv_everywhere", episodeBody);
+  iterEpisodeSources(episode.purchase_web_sources, "purchase", episodeBody);
 
-  iterEpisodeSources(episode.free_web_sources, "free", episodeBody)
-  iterEpisodeSources(episode.subscription_web_sources, "subscription", episodeBody)
-  iterEpisodeSources(episode.tv_everywhere_web_sources, "tv_everywhere", episodeBody)
-  iterEpisodeSources(episode.purchase_web_sources, "purchase", episodeBody)
-
-  episodeList.insertBefore(episodeLi, episodeList.firstChild);
+  episodeList.prepend(episodeLi);
 }
 
 function iterEpisodeSources(sources, type, episodeBody) {
@@ -137,16 +115,17 @@ function iterEpisodeSources(sources, type, episodeBody) {
 
   if (sources.length === 0) {
     return;
-  } else {
-    sources.forEach(source => {
-      let titleType = type === "purchase" ? `$${source.formats[0].price}` : texts[type]
-      let link = document.createElement("a");
-       link.className = "episode-link";
-       link.href = source.link;
-       link.textContent = `${source.display_name} ${titleType}`;
-      episodeBody.appendChild(link);
-    });
   }
+
+  sources.forEach(source => {
+    let titleType = type === "purchase" ? `$${source.formats[0].price}` : texts[type]
+    const link = ("<a/>", {
+      href: source.link,
+      text: `${source.display_name} ${titleType}`,
+      "class": "episode-link";
+    });
+    episodeBody.append(link);
+  });
 }
 
 function createSeasonList(showId, seasonNumbers) {
@@ -157,17 +136,16 @@ function createSeasonList(showId, seasonNumbers) {
 }
 
 function newSeasonListItem(showId, seasonNum) {
-  const seasonList = document.getElementById("season-list")
-  const div = document.createElement("div");
-    div.classList.add("chip", "blue");
-    div.onclick = function() {
-      const episodes = document.getElementById("episode-list");
-        episodes.textContent = "";
-      getSeasonInfo(showId, seasonNum);
+  const seasonList = $("#season-list");
+  const div = $("<div/>", {
+    text: `Season ${seasonNum}`,
+    "class": "chip blue",
+    click: () => {
+      $("#episode-list").empty();
+      getSeasonInfo(showId, seasonNum)
     }
-    div.textContent = `Season ${seasonNum}`
-
-  seasonList.appendChild(div);
+  });
+  seasonList.append(div);
 }
 
 function addMovieSources(sources, type) {
@@ -180,148 +158,104 @@ function addMovieSources(sources, type) {
 
   if (sources.length === 0) {
     return;
-  } else {
-    const ul = newSourceList(types[type]);
-    ul.classList.add("collection-item");
-    sources.forEach(source => {
-      addMovieSource(source, ul)
-    });
   }
+
+  const ul = createSourceList(types[type]);
+  sources.forEach(source => addMovieSource(source, ul));
 }
 
 function addMovieSource(source, sourceList) {
   const hasLogo = ["Netflix", "Amazon Prime", "Hulu"]
-  const li = newListItem("source");
-  const a = document.createElement("a");
-  a.href = source.link;
-  a.className = "source-link";
-  li.appendChild(a);
+  const listItem = $("<li/>", {"class": "list-item"});
+  const a = $("<a/>", {
+    href: source.link,
+    "class": "source-link"
+  });
+  listItem.append(a);
 
   if (hasLogo.includes(source.display_name)) {
-    const img = document.createElement("img");
     let sourceName = source.display_name.split(" ")[0].toLowerCase();
-    img.src = `assets/${sourceName}.png`;
-    img.className = "logo";
-    a.appendChild(img);
+    const img = $("<img/>", {
+      src: `assets/${sourceName}.png`,
+      "class": "logo"
+    });
+    a.append(img);
   } else {
-    a.textContent = source.display_name
+    a.text(source.display_name);
   }
 
   sourceList.appendChild(li);
 }
 
-function newSourceList(type) {
-  const sources = document.getElementById("sources")
-  sources.classList.add("collection");
-  const ul = document.createElement("ul");
-  const h5 = document.createElement("h5");
-  h5.textContent = type;
-  ul.appendChild(h5);
-  sources.appendChild(ul);
+function createSourceList(type) {
+  $("#sources").addClass("collection");
+  const ul = $("<ul/>", {"class": "collection-item"});
+  const h5 = $("<h5/>", {text: type});
+  ul.append(h5);
+  $("#sources").append(ul);
   return ul;
 }
 
 function addTitle(title, year) {
-  const detail = document.getElementById("item-detail");
   const yearString = year.toString();
-  const h4 = document.createElement("h4");
-    h4.textContent = `${title}  (${yearString})`
-    h4.classList.add("movie-title", "center");
-  detail.appendChild(h4);
+  const h4 = $("<h4/>", {
+    text: `${title}  (${yearString})`,
+    "class": "movie-title center"
+  });
+  $("#detail").append(h4);
 }
 
 function addPoster(poster) {
-  const detail = document.getElementById("item-detail");
-  const img = document.createElement("img");
-    img.src = poster;
-    img.classList.add("center");
-  detail.appendChild(img);
+  const img = $("<img/>", {
+    src: poster,
+    "class": "center"
+  });
+  $("item-detail").append(img);
 }
 
 //*********************************************************************
 // API CALL FUNCTIONS
 //*********************************************************************
-
-const baseUrl = "https://api-public.guidebox.com/v2";
-const apiKey = "api_key=rKy1Hw9qICyXezey3TcAJ2uv0bWwQkmL";
-const movieQuery = "/search?type=movie&field=title&query=";
-const showQuery = "/search?type=show&field=title&query=";
-
-function newXHR(url) {
-  const xhr = new XMLHttpRequest();
-  xhr.open('GET', url, true);
-  xhr.responseType = 'json';
-  return xhr;
-}
+const baseUrl = "http://tbd.com/";
 
 function searchForShow(searchString) {
-  document.getElementById("loading").textContent = "Loading..."
-  const url = `${baseUrl}${showQuery}${searchString}&${apiKey}`;
-  const xhr = newXHR(url);
-  xhr.onload = function () {
-    if (xhr.readyState === xhr.DONE && xhr.status === 200) {
-      document.getElementById("loading").textContent = ""
-      processShowResults(xhr.response.results);
-    }
-  };
-  xhr.send();
+  $("#loading").text("Loading...");
+  $.ajax({
+      url: `${baseUrl}show?search_string=${searchString}`,
+      type: 'GET',
+      success: response => processShowResults(response.results);
+  });
 }
 
 function searchForMovie(searchString) {
-  document.getElementById("loading").textContent = "Loading..."
-  const url = `${baseUrl}${movieQuery}${searchString}&${apiKey}`;
-  const xhr = newXHR(url);
-  xhr.onload = function () {
-    if (xhr.readyState === xhr.DONE && xhr.status === 200) {
-      document.getElementById("loading").textContent = ""
-      processMovieResults(xhr.response.results);
-    }
-  };
-  xhr.send();
+  $("#loading").text("Loading...");
+  $.ajax({
+      url: `${baseUrl}movie?search_string=${searchString}`,
+      type: 'GET',
+      success: response => processMovieResults(response.results);
+  });
 }
 
 function getShowById(id) {
-  const url = `${baseUrl}/shows/${id}?${apiKey}`;
-  const xhr = newXHR(url);
-  xhr.onload = function () {
-    if (xhr.readyState === xhr.DONE && xhr.status === 200) {
-      displayShowDetail(xhr.response);
-    }
-  };
-  xhr.send();
+  $.ajax({
+      url: `${baseUrl}/show/${id}`;
+      type: 'GET',
+      success: response => displayShowDetail(response);
+  });
 }
 
 function getMovieById(id) {
-  const url = `${baseUrl}/movies/${id}?${apiKey}`;
-  console.log(url);
-  const xhr = newXHR(url);
-  xhr.onload = function () {
-    if (xhr.readyState === xhr.DONE && xhr.status === 200) {
-      displayMovieDetail(xhr.response)
-    }
-  };
-  xhr.send();
+  $.ajax({
+      url: `${baseUrl}/movie/${id}`;
+      type: 'GET',
+      success: response => displayMovieDetail(response)
+  });
 }
 
-function getNumberOfSeasons(id) {
-  const url = `${baseUrl}/shows/${id}/seasons?${apiKey}`;
-  const xhr = newXHR(url);
-  xhr.onload = function () {
-    if (xhr.readyState === xhr.DONE && xhr.status === 200) {
-      const seasonNumbers = xhr.response.results.map(season => season.season_number);
-      createSeasonList(id, seasonNumbers)
-    }
-  };
-  xhr.send();
-}
-
-function getSeasonInfo(id, season) {
-  const url = `${baseUrl}/shows/${id}/episodes?season=${season}&${apiKey}&include_links=true`;
-  const xhr = newXHR(url);
-  xhr.onload = function () {
-    if (xhr.readyState === xhr.DONE && xhr.status === 200) {
-      createEpisodeList(xhr.response.results);
-    }
-  };
-  xhr.send();
+function getSeasonById(showId, seasonId) {
+  $.ajax({
+      url: `${baseUrl}/show/${showId}/season/${seasonId}`;
+      type: 'GET',
+      success: response => createEpisodeList(response);
+  });
 }
