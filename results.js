@@ -4,22 +4,13 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 });
 
-function processShowResults(results) {
+function processSearchResults(results, type) {
   $("#loading").empty();
-  if (results.length > 0) {
-    results.forEach(show => appendResultItem(show, "show"));
-  } else {
+  if (results.length === 0) {
     $("#results").text("No results found.");
+    return;
   }
-}
-
-function processMovieResults(results) {
-  $("#loading").empty();
-  if (results.length > 0) {
-    results.forEach(movie => appendResultItem(movie, "movie"));
-  } else {
-    $("#results").text("No results found.");
-  }
+  results.forEach(item => appendResultItem(item, type));
 }
 
 function appendResultItem(item, type) {
@@ -71,12 +62,10 @@ function displayMovieDetail(movie) {
 }
 
 function noSources(movie) {
-  if (movie.free_web_sources.length === 0 &&
-      movie.subscription_web_sources.length === 0 &&
-      movie.tv_everywhere_web_sources.length === 0 &&
-      movie.purchase_web_sources.length === 0) {
-    return true;
-  }
+  movie.free_web_sources.length === 0 &&
+  movie.subscription_web_sources.length === 0 &&
+  movie.tv_everywhere_web_sources.length === 0 &&
+  movie.purchase_web_sources.length === 0
 }
 
 function createEpisodeList(results) {
@@ -84,9 +73,9 @@ function createEpisodeList(results) {
   episodeList.addClass("collapsible");
   if (results.length === 0) {
     episodeList.text("No episode information for this season. Sorry about that.");
-  } else {
-    results.forEach(episode => newEpisodeItem(episode, episodeList));
+    return;
   }
+  results.forEach(episode => newEpisodeItem(episode, episodeList));
 }
 
 function newEpisodeItem(episode, episodeList) {
@@ -223,7 +212,7 @@ function searchForShow(searchString) {
   $.ajax({
       url: `${baseUrl}show?search_string=${searchString}`,
       type: 'GET',
-      success: response => processShowResults(response.results);
+      success: response => processSearchResults(response.results, "show");
   });
 }
 
@@ -232,7 +221,7 @@ function searchForMovie(searchString) {
   $.ajax({
       url: `${baseUrl}movie?search_string=${searchString}`,
       type: 'GET',
-      success: response => processMovieResults(response.results);
+      success: response => processSearchResults(response.results, "movie");
   });
 }
 
