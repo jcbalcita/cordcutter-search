@@ -15,23 +15,23 @@ function processSearchResults(results, type) {
 
 function appendResultItem(item, type) {
   const image = $("<img/>", {"class": "square"});
-  const title = $("<span/>");
-  const listItem = $("<li/>", {
+  const title = $("<span/>", {"class": "title right"});
+  const listItem = $("<a/>", {
     "class": "collection-item avatar list-item"
   });
 
   if (type === "movie") {
-    image.src(item.poster_120x171);
+    image.attr("src", item.poster_120x171);
     title.text(`${item.title} (${item.release_year})`);
     listItem.click(() => {
-      resultEl.empty();
+      $("#initial-results").text("")
       getMovieById(item.id);
     });
   } else if (type === "show") {
-    image.src(item.artwork_208x117);
+    image.attr("src", item.artwork_208x117);
     title.text(item.title);
     listItem.click(() => {
-      resultEl.empty();
+      $("#initial-results").text("")
       getShowById(item.id);
     });
   }
@@ -41,9 +41,35 @@ function appendResultItem(item, type) {
 }
 
 function displayShowDetail(show) {
-  addPoster(show.artwork_304x171);
-  addTitle(show.title, show.first_aired.slice(0, 4));
-  getNumberOfSeasons(show.id);
+  addDisplay(show.display);
+  addGeneralContent(show.content);
+  createSeasonList(show.id, show.seasons);
+}
+
+function addDisplay(display) {
+  addPoster(display.artwork);
+  addTitle(display.title, display.first_aired.slice(0, 4));
+  addOverview(display.overview);
+}
+
+function addGeneralContent(content) {
+  const generalSources = $("#general-sources");
+  if (content.length === 0) {
+    generalSources.text("We were uanble to find any streams for this show.");
+    return;
+  }
+  generalSources.append($("<br/>"));
+  content.forEach(source => {
+    if (source.type !== "purchase") { appendGeneralSource(source); }
+  });
+}
+
+function appendGeneralSource(source) {
+  const type = source.type === "tv_everywhere" ? "Cable/Dish Login Required" : source.type
+  const p = $("<p/>", {
+    html: `${source.display_name.bold()}  (${type})`
+  });
+  $("#general-sources").append(p);
 }
 
 function displayMovieDetail(movie) {
@@ -97,51 +123,45 @@ function newEpisodeItem(episode, episodeList) {
 
 function iterEpisodeSources(sources, type, episodeBody) {
   const texts = {
-    "free": "(free)",
-    "subscription": "(subscription)",
-    "tv_everywhere": "(login required)",
+    "free": "(Free)",
+    "subscription": "(Subscription)",
+    "tv_everywhere": "(TV Everywhere)",
   }
-
-  if (sources.length === 0) {
-    return;
-  }
+  if (sources.length === 0) { return; }
 
   sources.forEach(source => {
     let titleType = type === "purchase" ? `$${source.formats[0].price}` : texts[type]
-    const link = ("<a/>", {
-      href: source.link,
+    const link = $("<a/>", {
+      "href": source.link,
       text: `${source.display_name} ${titleType}`,
-      "class": "episode-link";
+      "class": "episode-link"
     });
     episodeBody.append(link);
   });
 }
 
 function createSeasonList(showId, seasonNumbers) {
-  if (seasonNumbers.length === 0) {
-    return;
-  }
+  if (seasonNumbers.length === 0) { return; }
   seasonNumbers.forEach(seasonNum => newSeasonListItem(showId, seasonNum))
 }
 
 function newSeasonListItem(showId, seasonNum) {
-  const seasonList = $("#season-list");
   const div = $("<div/>", {
     text: `Season ${seasonNum}`,
     "class": "chip blue",
     click: () => {
-      $("#episode-list").empty();
-      getSeasonInfo(showId, seasonNum)
+      $("#episode-list").text("");
+      getSeasonById(showId, seasonNum)
     }
   });
-  seasonList.append(div);
+  $("#season-list").append(div);
 }
 
 function addMovieSources(sources, type) {
   const types = {
     "free": "Free:",
     "sub": "Subscription:",
-    "tve": "Cable/Dish Login Required:",
+    "tve": "TV Everywhere:",
     "purchase": "Purchase:"
   }
 
@@ -173,7 +193,7 @@ function addMovieSource(source, sourceList) {
     a.text(source.display_name);
   }
 
-  sourceList.appendChild(li);
+  sourceList.append(a);
 }
 
 function createSourceList(type) {
@@ -191,51 +211,60 @@ function addTitle(title, year) {
     text: `${title}  (${yearString})`,
     "class": "movie-title center"
   });
-  $("#detail").append(h4);
+  $("#item-detail").append(h4);
 }
 
 function addPoster(poster) {
   const img = $("<img/>", {
-    src: poster,
+    "src": poster,
     "class": "center"
   });
-  $("item-detail").append(img);
+  $("#item-detail").append(img);
+}
+
+function addOverview(overview) {
+  const p = $("<p/>", {
+    text: overview,
+    "class": "left-align"
+  });
+  $("#item-detail").append(p);
 }
 
 //*********************************************************************
 // API CALL FUNCTIONS
 //*********************************************************************
-const baseUrl = "http://tbd.com/";
+const baseUrl = "http://localhost:4000/api/";
 
 function searchForShow(searchString) {
   $("#loading").text("Loading...");
   $.ajax({
-      url: `${baseUrl}show?search_string=${searchString}`,
+      url: `${baseUrl}shows?search_string=${searchString}`,
       type: 'GET',
-      success: response => processSearchResults(response.results, "show");
+      success: response => processSearchResults(response, "show")
   });
 }
 
 function searchForMovie(searchString) {
   $("#loading").text("Loading...");
   $.ajax({
-      url: `${baseUrl}movie?search_string=${searchString}`,
+      url: `${baseUrl}movies?search_string=${searchString}`,
       type: 'GET',
-      success: response => processSearchResults(response.results, "movie");
+      success: response => processSearchResults(response, "movie")
   });
 }
 
 function getShowById(id) {
+  console.log("GET SHOW BY ID");
   $.ajax({
-      url: `${baseUrl}/show/${id}`;
+      url: `${baseUrl}shows/${id}`,
       type: 'GET',
-      success: response => displayShowDetail(response);
+      success: response => displayShowDetail(response)
   });
 }
 
 function getMovieById(id) {
   $.ajax({
-      url: `${baseUrl}/movie/${id}`;
+      url: `${baseUrl}movies/${id}`,
       type: 'GET',
       success: response => displayMovieDetail(response)
   });
@@ -243,8 +272,8 @@ function getMovieById(id) {
 
 function getSeasonById(showId, seasonId) {
   $.ajax({
-      url: `${baseUrl}/show/${showId}/season/${seasonId}`;
+      url: `${baseUrl}shows/${showId}/season/${seasonId}`,
       type: 'GET',
-      success: response => createEpisodeList(response);
+      success: response => createEpisodeList(response)
   });
 }

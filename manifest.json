@@ -22,6 +22,6 @@
     "tabs",
     "contextMenus",
     "storage",
-    "https://api-public.guidebox.com/*"
+    "http://localhost:4000/*"
   ]
 }

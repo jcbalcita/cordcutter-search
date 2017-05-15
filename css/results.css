@@ -3,6 +3,10 @@ html, div, span, img {
   margin: 0 auto;
 }
 
+li {
+  list-style-type: none;
+}
+
 h4 {
   font-weight: 700;
 }
@@ -52,6 +56,9 @@ span {
   cursor: pointer;
 }
 
+.source-link {
+  margin-right: 5px;
+}
 
 .source-link:hover {
   text-decoration: underline;
