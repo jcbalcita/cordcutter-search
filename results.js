@@ -233,7 +233,7 @@ function addOverview(overview) {
 //*********************************************************************
 // API CALL FUNCTIONS
 //*********************************************************************
-const baseUrl = "http://localhost:4000/api/";
+const baseUrl = "http://www.cordcutter.io/api/";
 
 function searchForShow(searchString) {
   $("#loading").text("Loading...");
