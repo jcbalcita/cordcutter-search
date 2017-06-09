@@ -1,304 +1,321 @@
 document.addEventListener("DOMContentLoaded", () => {
+  const apiCaller = new ApiCaller();
+  const results = new Results(apiCaller);
+
   chrome.storage.local.get(["search", "type"], data => {
-    data.type === "movie" ? searchForMovie(data.search) : searchForShow(data.search);
+    data.type === "movie" ?
+      results.movieHandler.searchForMovie(data.search) : results.showHanlder.searchForShow(data.search);
   });
 });
 
-/*
-**********************************************
-INITIAL SEARCH RESULTS
-**********************************************
-*/
-function processSearchResults(results, type) {
-  $("#loading").empty();
-  if (results.length === 0) {
-    $("#results").text("No results found.");
-    return;
+class Results {
+  constructor(apiCaller) {
+    this.movieHandler = new MovieHandler(apiCaller);
+    this.showHandler = new ShowHandler(apiCaller);
   }
-  results.forEach(item => appendResultItem(item, type));
 }
 
-function appendResultItem(item, type) {
-  const image = $("<img/>", {"class": "square"});
-  const title = $("<span/>", {"class": "title right"});
-  const listItem = $("<a/>", {
-    "class": "collection-item avatar list-item"
-  });
-
-  if (type === "movie") {
-    image.attr("src", item.poster_120x171);
-    title.text(`${item.title} (${item.release_year})`);
-    listItem.click(() => {
-      $("#initial-results").text("")
-      getMovieById(item.id);
-    });
-  } else if (type === "show") {
-    image.attr("src", item.artwork_208x117);
-    title.text(item.title);
-    listItem.click(() => {
-      $("#initial-results").text("")
-      getShowById(item.id);
-    });
+class MediaHandler {
+  constructor(apiCaller) {
+    this.apiCaller = apiCaller;
   }
 
-  listItem.append(image, title);
-  $("#initial-results").append(listItem);
-}
-
-/*
-**********************************************
-MOVIE DETAIL
-**********************************************
-*/
-function displayMovieDetail(movie) {
-  addMovieDisplay(movie.display);
-  addMovieSources(movie.sources);
-
-  if (noSources(movie)) {
-    $("#sources").text("We were unable to find any streams for this movie.");
-    return;
-  }
-
-  addMovieSources(movie.sources.free, "free");
-  addMovieSources(movie.sources.subscription, "sub");
-  addMovieSources(movie.sources.tv_everywhere, "tve");
-  addMovieSources(movie.sources.purchase, "purchase");
-}
-
-function addMovieDisplay(display) {
-  addPoster(display.poster);
-  addTitle(display.title, display.release_year);
-  addOverview(display.overview);
-}
-
-function noSources(movie) {
-  movie.sources.free.length === 0 &&
-  movie.sources.subscription.length === 0 &&
-  movie.sources.tv_everywhere.length === 0 &&
-  movie.sources.purchase.length === 0
-}
-
-function addMovieSources(sources, type) {
-  const types = {
-    "free": "Free:",
-    "sub": "Subscription:",
-    "tve": "TV Everywhere:",
-    "purchase": "Purchase:"
-  }
-
-  if (sources.length === 0) { return; }
-
-  const ul = createSourceList(types[type]);
-  sources.forEach(source => addMovieSource(source, ul));
-}
-
-function addMovieSource(source, sourceList) {
-  const hasLogo = ["Netflix", "Amazon Prime", "Hulu"]
-  const listItem = $("<li/>", {"class": "list-item"});
-  const a = $("<a/>", {
-    href: source.link,
-    "class": "source-link"
-  });
-  listItem.append(a);
-
-  if (hasLogo.includes(source.display_name)) {
-    let sourceName = source.display_name.split(" ")[0].toLowerCase();
-    const img = $("<img/>", {
-      src: `assets/${sourceName}.png`,
-      "class": "logo"
-    });
-    a.append(img);
-  } else {
-    a.text(source.display_name);
-  }
-
-  sourceList.append(a);
-}
-
-function createSourceList(type) {
-  $("#sources").addClass("collection");
-  const ul = $("<ul/>", {"class": "collection-item"});
-  const h5 = $("<h5/>", {text: type});
-  ul.append(h5);
-  $("#sources").append(ul);
-  return ul;
-}
-
-/*
-**********************************************
-SHOW DETAIL
-**********************************************
-*/
-function displayShowDetail(show) {
-  addShowDisplay(show.display);
-  addGeneralContent(show.content);
-  createSeasonList(show.id, show.seasons);
-}
-
-function addShowDisplay(display) {
-  addPoster(display.artwork);
-  addTitle(display.title, display.first_aired.slice(0, 4));
-  addOverview(display.overview);
-}
-
-function addGeneralContent(content) {
-  const generalSources = $("#general-sources");
-  if (content.length === 0) {
-    generalSources.text("We were uanble to find any streams for this show.");
-    return;
-  }
-  generalSources.append($("<br/>"));
-  content.forEach(source => {
-    if (source.type !== "purchase") { appendGeneralSource(source); }
-  });
-}
-
-function createSeasonList(showId, seasonNumbers) {
-  if (seasonNumbers.length === 0) { return; }
-  seasonNumbers.forEach(seasonNum => newSeasonListItem(showId, seasonNum))
-}
-
-function appendGeneralSource(source) {
-  const type = source.type === "tv_everywhere" ? "Cable/Dish Login Required" : source.type
-  const p = $("<p/>", {
-    html: `${source.display_name.bold()}  (${type})`
-  });
-  $("#general-sources").append(p);
-}
-
-function newSeasonListItem(showId, seasonNum) {
-  const div = $("<div/>", {
-    text: `Season ${seasonNum}`,
-    "class": "chip blue",
-    click: () => {
-      $("#episode-list").text("");
-      getSeasonById(showId, seasonNum)
+  processSearchResults(results, type) {
+    $("#loading").empty();
+    if (results.length === 0) {
+      $("#results").text("No results found.");
+      return;
     }
-  });
-  $("#season-list").append(div);
-}
-
-function createEpisodeList(results) {
-  const episodeList = $("#episode-list");
-  episodeList.addClass("collapsible");
-  if (results.length === 0) {
-    episodeList.text("No episode information for this season. Sorry about that.");
-    return;
+    results.forEach(item => this.appendResultItem(item, type));
   }
-  results.forEach(episode => newEpisodeItem(episode, episodeList));
-}
 
-function newEpisodeItem(episode, episodeList) {
-  const episodeLi = $("<li/>");
-  const episodeHeader = $("<div/>", {
-    text: `Episode ${episode.episode_number}:  ${episode.original_title}`,
-    "class": "collapsible-header"
-  });
-  const episodeBody = $("<div/>", {"class": "collapsible-body"});
-  episodeLi.append(episodeHeader, episodeBody);
-
-  iterEpisodeSources(episode.free_web_sources, "free", episodeBody);
-  iterEpisodeSources(episode.subscription_web_sources, "subscription", episodeBody);
-  iterEpisodeSources(episode.tv_everywhere_web_sources, "tv_everywhere", episodeBody);
-  iterEpisodeSources(episode.purchase_web_sources, "purchase", episodeBody);
-
-  episodeList.prepend(episodeLi);
-}
-
-function iterEpisodeSources(sources, type, episodeBody) {
-  const texts = {
-    "free": "(Free)",
-    "subscription": "(Subscription)",
-    "tv_everywhere": "(TV Everywhere)",
-  }
-  if (sources.length === 0) { return; }
-
-  sources.forEach(source => {
-    let titleType = type === "purchase" ? `$${source.formats[0].price}` : texts[type]
-    const link = $("<a/>", {
-      "href": source.link,
-      text: `${source.display_name} ${titleType}`,
-      "class": "episode-link"
+  appendResultItem(item, type) {
+    const image = $("<img/>", {"class": "square"});
+    const title = $("<span/>", {"class": "title right"});
+    const listItem = $("<a/>", {
+      "class": "collection-item avatar list-item"
     });
-    episodeBody.append(link);
-  });
+
+    if (type === "movie") {
+      image.attr("src", item.poster_120x171);
+      title.text(`${item.title} (${item.release_year})`);
+      listItem.click(() => {
+        $("#initial-results").text("")
+        this.apiCaller.getMovieById(item.id);
+      });
+    } else if (type === "show") {
+      image.attr("src", item.artwork_208x117);
+      title.text(item.title);
+      listItem.click(() => {
+        $("#initial-results").text("")
+        this.apiCaller.getShowById(item.id);
+      });
+    }
+
+    listItem.append(image, title);
+    $("#initial-results").append(listItem);
+  }
+
+  addTitle(title, year) {
+    const yearString = year.toString();
+    const h4 = $("<h4/>", {
+      text: `${title}  (${yearString})`,
+      "class": "movie-title center"
+    });
+    $("#item-detail").append(h4);
+  }
+
+  addPoster(posterSource) {
+    const img = $("<img/>", {
+      "src": posterSource,
+      "class": "center"
+    });
+    $("#item-detail").append(img);
+  }
+
+  addOverview(overview) {
+    const p = $("<p/>", {
+      text: overview,
+      "class": "left-align"
+    });
+    $("#item-detail").append(p);
+  }
 }
 
-/*
-**********************************************
-MOVIE/SHOW SHARED DISPLAY FUNCTIONS
-**********************************************
-*/
-function addTitle(title, year) {
-  const yearString = year.toString();
-  const h4 = $("<h4/>", {
-    text: `${title}  (${yearString})`,
-    "class": "movie-title center"
-  });
-  $("#item-detail").append(h4);
+class MovieHandler extends Media {
+  constructor(apiCaller) {
+    super(apiCaller);
+    this.sourceTypes = {
+      "free": "Free:",
+      "sub": "Subscription:",
+      "tve": "TV Everywhere:",
+      "purchase": "Purchase:"
+    };
+    this.hasLogo = ["Netflix", "Amazon Prime", "Hulu"];
+  }
+
+  displayMovieDetail(movie) {
+    this.addMovieDisplay(movie.display);
+    this.addMovieSources(movie.sources);
+
+    if (noSources(movie)) {
+      $("#sources").text("We were unable to find any streams for this movie.");
+      return;
+    }
+
+    this.addMovieSources(movie.sources.free, "free");
+    this.addMovieSources(movie.sources.subscription, "sub");
+    this.addMovieSources(movie.sources.tv_everywhere, "tve");
+    this.addMovieSources(movie.sources.purchase, "purchase");
+  }
+
+  addMovieDisplay(display) {
+    this.addPoster(display.poster);
+    this.addTitle(display.title, display.release_year);
+    this.addOverview(display.overview);
+  }
+
+  noSources(movie) {
+    movie.sources.free.length === 0 &&
+    movie.sources.subscription.length === 0 &&
+    movie.sources.tv_everywhere.length === 0 &&
+    movie.sources.purchase.length === 0
+  }
+
+  addMovieSources(sources, type) {
+    if (sources.length === 0) { return; }
+    const ul = this.createSourceList(this.sourceTypes[type]);
+    sources.forEach(source => this.addMovieSource(source, ul));
+  }
+
+  addMovieSource(source, sourceList) {
+    const listItem = $("<li/>", {"class": "list-item"});
+    const a = $("<a/>", {
+      href: source.link,
+      "class": "source-link"
+    });
+    listItem.append(a);
+
+    if (this.hasLogo.includes(source.display_name)) {
+      let sourceName = source.display_name.split(" ")[0].toLowerCase();
+      const img = $("<img/>", {
+        src: `assets/${sourceName}.png`,
+        "class": "logo"
+      });
+      a.append(img);
+    } else {
+      a.text(source.display_name);
+    }
+
+    sourceList.append(a);
+  }
+
+  createSourceList(type) {
+    $("#sources").addClass("collection");
+    const ul = $("<ul/>", {"class": "collection-item"});
+    const h5 = $("<h5/>", {text: type});
+    ul.append(h5);
+    $("#sources").append(ul);
+    return ul;
+  }
 }
 
-function addPoster(posterSource) {
-  const img = $("<img/>", {
-    "src": posterSource,
-    "class": "center"
-  });
-  $("#item-detail").append(img);
+
+class ShowHandler extends MediaHandler {
+  constructor(apiCaller) {
+    super(props);
+    this.sourceTypes = {
+      "free": "(Free)",
+      "subscription": "(Subscription)",
+      "tv_everywhere": "(TV Everywhere)",
+    }
+  }
+
+  displayShowDetail(show) {
+    this.addShowDisplay(show.display);
+    this.addGeneralContent(show.content);
+    this.createSeasonList(show.id, show.seasons);
+  }
+
+  addShowDisplay(display) {
+    this.addPoster(display.artwork);
+    this.addTitle(display.title, display.first_aired.slice(0, 4));
+    this.addOverview(display.overview);
+  }
+
+  addGeneralContent(content) {
+    const generalSources = $("#general-sources");
+    if (content.length === 0) {
+      generalSources.text("We were uanble to find any streams for this show.");
+      return;
+    }
+    generalSources.append($("<br/>"));
+    content.forEach(source => {
+      if (source.type !== "purchase") { this.appendGeneralSource(source); }
+    });
+  }
+
+  createSeasonList(showId, seasonNumbers) {
+    if (seasonNumbers.length === 0) { return; }
+    seasonNumbers.forEach(seasonNum => this.newSeasonListItem(showId, seasonNum))
+  }
+
+  appendGeneralSource(source) {
+    const type = source.type === "tv_everywhere" ? "Cable/Dish Login Required" : source.type
+    const p = $("<p/>", {
+      html: `${source.display_name.bold()}  (${type})`
+    });
+    $("#general-sources").append(p);
+  }
+
+  newSeasonListItem(showId, seasonNum) {
+    const div = $("<div/>", {
+      text: `Season ${seasonNum}`,
+      "class": "chip blue",
+      click: () => {
+        $("#episode-list").text("");
+        this.apiCaller.getSeasonById(showId, seasonNum)
+      }
+    });
+    $("#season-list").append(div);
+  }
+
+  createEpisodeList(results) {
+    const episodeList = $("#episode-list");
+    episodeList.addClass("collapsible");
+    if (results.length === 0) {
+      episodeList.text("No episode information for this season. Sorry about that.");
+      return;
+    }
+    results.forEach(episode => this.newEpisodeItem(episode, episodeList));
+  }
+
+  newEpisodeItem(episode, episodeList) {
+    const episodeLi = $("<li/>");
+    const episodeHeader = $("<div/>", {
+      text: `Episode ${episode.episode_number}:  ${episode.original_title}`,
+      "class": "collapsible-header"
+    });
+    const episodeBody = $("<div/>", {"class": "collapsible-body"});
+    episodeLi.append(episodeHeader, episodeBody);
+
+    this.iterEpisodeSources(episode.free_web_sources, "free", episodeBody);
+    this.iterEpisodeSources(episode.subscription_web_sources, "subscription", episodeBody);
+    this.iterEpisodeSources(episode.tv_everywhere_web_sources, "tv_everywhere", episodeBody);
+    this.iterEpisodeSources(episode.purchase_web_sources, "purchase", episodeBody);
+
+    episodeList.prepend(episodeLi);
+  }
+
+  iterEpisodeSources(sources, type, episodeBody) {
+    if (sources.length === 0) { return; }
+
+    sources.forEach(source => {
+      let titleType = type === "purchase" ? `$${source.formats[0].price}` : this.sourceTypes[type]
+      const link = $("<a/>", {
+        "href": source.link,
+        text: `${source.display_name} ${titleType}`,
+        "class": "episode-link"
+      });
+      episodeBody.append(link);
+    });
+  }
 }
 
-function addOverview(overview) {
-  const p = $("<p/>", {
-    text: overview,
-    "class": "left-align"
-  });
-  $("#item-detail").append(p);
-}
 
-/*
-**********************************************
-API CALL FUNCTIONS
-**********************************************
-*/
-const baseUrl = "http://wwww.cordcutter.io/api/";
+class ApiCaller {
+  constructor() {
+    this.baseUrl = "http://wwww.cordcutter.io/api/";
+  }
 
-function searchForShow(searchString) {
-  $("#loading").text("Loading...");
-  $.ajax({
-    url: `${baseUrl}shows?search_string=${searchString}`,
-    type: 'GET',
-    success: response => processSearchResults(response, "show")
-  });
-}
+  searchForShow() {
+    $("#loading").text("Loading...");
+    $.ajax({
+      url: `${this.baseUrl}shows?search_string=${searchString}`,
+      type: 'GET',
+      success: response => this.processSearchResults(response, "show")
+    });
+  }
 
-function searchForMovie(searchString) {
-  $("#loading").text("Loading...");
-  $.ajax({
-    url: `${baseUrl}movies?search_string=${searchString}`,
-    type: 'GET',
-    success: response => processSearchResults(response, "movie")
-  });
-}
+  searchForMovie(searchString) {
+    $("#loading").text("Loading...");
+    $.ajax({
+      url: `${this.baseUrl}movies?search_string=${searchString}`,
+      type: 'GET',
+      success: response => this.processSearchResults(response, "movie")
+    });
+  }
 
-function getShowById(id) {
-  $.ajax({
-    url: `${baseUrl}shows/${id}`,
-    type: 'GET',
-    success: response => displayShowDetail(response)
-  });
-}
+  function searchForMovie(searchString) {
+    $("#loading").text("Loading...");
+    $.ajax({
+      url: `${this.baseUrl}movies?search_string=${searchString}`,
+      type: 'GET',
+      success: response => this.processSearchResults(response, "movie")
+    });
+  }
 
-function getMovieById(id) {
-  $.ajax({
-    url: `${baseUrl}movies/${id}`,
-    type: 'GET',
-    success: response => displayMovieDetail(response)
-  });
-}
+  getShowById(id) {
+    $.ajax({
+      url: `${this.baseUrl}shows/${id}`,
+      type: 'GET',
+      success: response => this.displayShowDetail(response)
+    });
+  }
 
-function getSeasonById(showId, seasonId) {
-  $.ajax({
-    url: `${baseUrl}shows/${showId}/season/${seasonId}`,
-    type: 'GET',
-    success: response => createEpisodeList(response)
-  });
+  getMovieById(id) {
+    $.ajax({
+      url: `${this.baseUrl}movies/${id}`,
+      type: 'GET',
+      success: response => this.displayMovieDetail(response)
+    });
+  }
+
+  getSeasonById(showId, seasonId) {
+    $.ajax({
+      url: `${this.baseUrl}shows/${showId}/season/${seasonId}`,
+      type: 'GET',
+      success: response => this.createEpisodeList(response)
+    });
+  }
 }
