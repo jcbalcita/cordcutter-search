@@ -82,8 +82,8 @@ class MovieHandler extends MediaHandler {
     super(apiCaller);
     this.sourceTypes = {
       "free": "Free:",
-      "sub": "Subscription:",
-      "tve": "TV Everywhere:",
+      "subscription": "Subscription:",
+      "tv_everywhere": "TV Everywhere:",
       "purchase": "Purchase:"
     };
     this.hasLogo = ["Netflix", "Amazon Prime", "Hulu"];
@@ -120,9 +120,7 @@ class MovieHandler extends MediaHandler {
   }
 
   displayMovieDetail(movie) {
-    console.log(JSON.stringify(movie, null, 4))
     this.addMovieDisplay(movie.display);
-    this.addMovieSources(movie.sources);
 
     if (this.noSources(movie)) {
       $("#sources").text("We were unable to find any streams for this movie.");
@@ -130,7 +128,7 @@ class MovieHandler extends MediaHandler {
     }
 
     const sourceTypes = Object.keys(movie.sources);
-    sourceTypes.forEach(type => addMovieSources(movie.sources[type], type));
+    sourceTypes.forEach(type => this.addMovieSources(movie.sources[type], type));
   }
 
   addMovieDisplay(display) {
