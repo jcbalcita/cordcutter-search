@@ -17,31 +17,34 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  movieButton.onclick = () => {
+  movieButton.click(() => {
     chrome.storage.local.set({ type: "movie" }, () => {
-      this.removeClass("lighten-4");
+      movieButton.removeClass("lighten-4");
       showButton.addClass("lighten-4");
       input.focus();
     });
-  }
+  });
 
-  showButton.onclick = () => {
+  showButton.click(() => {
     chrome.storage.local.set({ type: "show" }, () => {
-      this.removeClass("lighten-4");
+      showButton.removeClass("lighten-4");
       movieButton.addClass("lighten-4");
       input.focus();
     });
-  }
+  });
 
-  form.addEventListener("submit", e => {
+  form.submit(e => {
     e.preventDefault();
     const errors = $("#errors");
-    if (input.value) {
+    if($.trim(input.val()).length > 0) {
       errors.text("");
-      chrome.storage.local.set({ search: encodeURIComponent(input.value.slice(0, 75)) },
-      () => chrome.tabs.create({ url: "results.html" }));
+      chrome.storage.local.set({ search: encodeURIComponent(input.val().slice(0, 75)) }, () => {
+        chrome.tabs.create({ url: "results.html" });
+      });
     } else {
       errors.text("Search field can't be blank.");
+      input.val("");
     }
   });
+
 });
