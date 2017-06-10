@@ -1,7 +1,7 @@
 class Main {
-  constructor(apiCaller) {
-    this.movieHandler = new MovieHandler(apiCaller);
-    this.showHandler = new ShowHandler(apiCaller);
+  constructor() {
+    this.movieHandler = new MovieHandler();
+    this.showHandler = new ShowHandler();
   }
 }
 
@@ -121,7 +121,7 @@ class MovieHandler extends MediaHandler {
   displayMovieDetail(movie) {
     this.addMovieDisplay(movie.display);
 
-    if (this.noSources(movie)) {
+    if (this.noSources(movie.sources)) {
       $("#sources").text("We were unable to find any streams for this movie.");
       return;
     }
@@ -136,11 +136,11 @@ class MovieHandler extends MediaHandler {
     this.addOverview(display.overview);
   }
 
-  noSources(movie) {
-    movie.sources.free.length === 0 &&
-    movie.sources.subscription.length === 0 &&
-    movie.sources.tv_everywhere.length === 0 &&
-    movie.sources.purchase.length === 0
+  noSources(sources) {
+    sources.free.length === 0 &&
+    sources.subscription.length === 0 &&
+    sources.tv_everywhere.length === 0 &&
+    sources.purchase.length === 0
   }
 
   addMovieSources(sources, type) {
@@ -304,7 +304,6 @@ class ShowHandler extends MediaHandler {
     });
   }
 }
-
 
 document.addEventListener("DOMContentLoaded", () => {
   const main = new Main();
