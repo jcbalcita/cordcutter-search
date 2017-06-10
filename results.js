@@ -86,7 +86,6 @@ class MovieHandler extends MediaHandler {
       "tv_everywhere": "TV Everywhere:",
       "purchase": "Purchase:"
     };
-    this.hasLogo = ["Netflix", "Amazon Prime", "Hulu"];
   }
 
   processSearchResults(results) {
@@ -156,19 +155,9 @@ class MovieHandler extends MediaHandler {
       href: source.link,
       "class": "source-link"
     });
+
+    a.text(source.display_name);
     listItem.append(a);
-
-    if (this.hasLogo.includes(source.display_name)) {
-      let sourceName = source.display_name.split(" ")[0].toLowerCase();
-      const img = $("<img/>", {
-        src: `assets/${sourceName}.png`,
-        "class": "logo"
-      });
-      a.append(img);
-    } else {
-      a.text(source.display_name);
-    }
-
     sourceList.append(a);
   }
 
