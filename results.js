@@ -1,14 +1,3 @@
-document.addEventListener("DOMContentLoaded", () => {
-  const apiCaller = new ApiCaller();
-  const main = new Main(apiCaller);
-
-  chrome.storage.local.get(["search", "type"], data => {
-    data.type === "movie" ?
-      main.movieHandler.apiCaller.searchForMovie(data.search, main.movieHandler.processSearchResults) :
-      main.showHandler.apiCaller.searchForShow(data.search, main.showHandler.processSearchResults);
-  });
-});
-
 class Main {
   constructor(apiCaller) {
     this.movieHandler = new MovieHandler(apiCaller);
@@ -17,9 +6,8 @@ class Main {
 }
 
 class MediaHandler {
-  constructor(apiCaller) {
-    this.apiCaller = apiCaller;
-    this.processSearchResults = this.processSearchResults.bind(this);
+  constructor() {
+    this.baseUrl = "http://localhost:4000/api/";
   }
 
   addTitle(title, year) {
@@ -46,12 +34,52 @@ class MediaHandler {
     });
     $("#item-detail").append(p);
   }
+
+  searchForShow(searchString) {
+    $.ajax({
+      url: `${this.baseUrl}shows?search_string=${searchString}`,
+      type: 'GET',
+      success: response => this.processSearchResults(response)
+    });
+  }
+
+  searchForMovie(searchString) {
+    $("#loading").text("Loading...");
+    $.ajax({
+      url: `${this.baseUrl}movies?search_string=${searchString}`,
+      type: 'GET',
+      success: response => this.processSearchResults(response)
+    });
+  }
+
+  getShowById(id) {
+    $.ajax({
+      url: `${this.baseUrl}shows/${id}`,
+      type: 'GET',
+      success: response => this.displayShowDetail(response)
+    });
+  }
+
+  getMovieById(id) {
+    $.ajax({
+      url: `${this.baseUrl}movies/${id}`,
+      type: 'GET',
+      success: response => this.displayMovieDetail(response)
+    });
+  }
+
+  getSeasonById(showId, seasonId) {
+    $.ajax({
+      url: `${this.baseUrl}shows/${showId}/season/${seasonId}`,
+      type: 'GET',
+      success: response => this.createEpisodeList(response)
+    });
+  }
 }
 
 class MovieHandler extends MediaHandler {
   constructor(apiCaller) {
     super(apiCaller);
-    this.displayMovieDetail = this.displayMovieDetail.bind(this);
     this.sourceTypes = {
       "free": "Free:",
       "sub": "Subscription:",
@@ -61,16 +89,16 @@ class MovieHandler extends MediaHandler {
     this.hasLogo = ["Netflix", "Amazon Prime", "Hulu"];
   }
 
-  processSearchResults(results, type) {
+  processSearchResults(results) {
     $("#loading").empty();
     if (results.length === 0) {
       $("#results").text("No results found.");
       return;
     }
-    results.forEach(item => this.appendResultItem(item, type));
+    results.forEach(item => this.appendResultItem(item));
   }
 
-  appendResultItem(item, type) {
+  appendResultItem(item) {
     const image = $("<img/>", {
       "class": "square",
       "src": item.poster_120x171
@@ -80,18 +108,19 @@ class MovieHandler extends MediaHandler {
       text: `${item.title} (${item.release_year})`
     });
     const listItem = $("<a/>", {
-      "class": "collection-item avatar list-item",
-      onclick: () => {
-        $("#initial-results").text("")
-        this.apiCaller.getMovieById(item.id, this.displayMovieDetail);
-      }
+      "class": "collection-item avatar list-item"
     });
 
+    listItem.click(() => {
+      $("#initial-results").text("")
+      this.getMovieById(item.id);
+    });
     listItem.append(image, title);
     $("#initial-results").append(listItem);
   }
 
   displayMovieDetail(movie) {
+    console.log(JSON.stringify(movie, null, 4))
     this.addMovieDisplay(movie.display);
     this.addMovieSources(movie.sources);
 
@@ -101,7 +130,7 @@ class MovieHandler extends MediaHandler {
     }
 
     const sourceTypes = Object.keys(movie.sources);
-    sourceTypes.forEach(type => this.addMovieSources(movie.sources[type], type))
+    sourceTypes.forEach(type => addMovieSources(movie.sources[type], type));
   }
 
   addMovieDisplay(display) {
@@ -157,10 +186,8 @@ class MovieHandler extends MediaHandler {
 
 
 class ShowHandler extends MediaHandler {
-  constructor(apiCaller) {
-    super(apiCaller);
-    this.displayShowDetail = this.displayShowDetail.bind(this);
-    this.createEpisodeList = this.createSeasonList.bind(this);
+  constructor() {
+    super();
     this.sourceTypes = {
       "free": "(Free)",
       "subscription": "(Subscription)",
@@ -168,16 +195,16 @@ class ShowHandler extends MediaHandler {
     }
   }
 
-  processSearchResults(results, type) {
+  processSearchResults(results) {
     $("#loading").empty();
     if (results.length === 0) {
       $("#results").text("No results found.");
       return;
     }
-    results.forEach(item => this.appendResultItem(item, type));
+    results.forEach(item => this.appendResultItem(item));
   }
 
-  appendResultItem(item, type) {
+  appendResultItem(item) {
     const image = $("<img/>", {
       "class": "square",
       "src": item.artwork_208x117
@@ -188,10 +215,11 @@ class ShowHandler extends MediaHandler {
     });
     const listItem = $("<a/>", {
       "class": "collection-item avatar list-item",
-      onclick: () => {
-        $("#initial-results").text("")
-        this.apiCaller.getShowById(item.id);
-      }
+    });
+
+    listItem.click(() => {
+      $("#initial-results").text("")
+      this.getShowById(item.id, this.displayShowDetail.bind(this));
     });
 
     listItem.append(image, title);
@@ -202,6 +230,7 @@ class ShowHandler extends MediaHandler {
     this.addShowDisplay(show.display);
     this.addGeneralContent(show.content);
     this.createSeasonList(show.id, show.seasons);
+    console.log("season 1");
   }
 
   addShowDisplay(display) {
@@ -223,8 +252,8 @@ class ShowHandler extends MediaHandler {
   }
 
   createSeasonList(showId, seasonNumbers) {
-    if (seasonNumbers.length === 0) { return; }
-    seasonNumbers.forEach(seasonNum => this.newSeasonListItem(showId, seasonNum))
+    if (!seasonNumbers || seasonNumbers.length === 0) { return; }
+    seasonNumbers.forEach(seasonNum => this.newSeasonListItem(showId, seasonNum));
   }
 
   appendGeneralSource(source) {
@@ -241,7 +270,7 @@ class ShowHandler extends MediaHandler {
       "class": "chip blue",
       click: () => {
         $("#episode-list").text("");
-        this.apiCaller.getSeasonById(showId, seasonNum, this.createEpisodeList)
+        this.getSeasonById(showId, seasonNum, this.createEpisodeList)
       }
     });
     $("#season-list").append(div);
@@ -290,59 +319,11 @@ class ShowHandler extends MediaHandler {
 }
 
 
-class ApiCaller {
-  constructor() {
-    this.baseUrl = "http://wwww.cordcutter.io/api/";
-  }
-
-  searchForShow(searchString, processSearchResults) {
-    $("#loading").text("Loading...");
-    $.ajax({
-      url: `${this.baseUrl}shows?search_string=${searchString}`,
-      type: 'GET',
-      success: response => processSearchResults(response, "show")
-    });
-  }
-
-  searchForMovie(searchString, processSearchResults) {
-    $("#loading").text("Loading...");
-    $.ajax({
-      url: `${this.baseUrl}movies?search_string=${searchString}`,
-      type: 'GET',
-      success: response => processSearchResults(response, "movie")
-    });
-  }
-
-  searchForMovie(searchString, processSearchResults) {
-    $("#loading").text("Loading...");
-    $.ajax({
-      url: `${this.baseUrl}movies?search_string=${searchString}`,
-      type: 'GET',
-      success: response => processSearchResults(response, "movie")
-    });
-  }
-
-  getShowById(id, displayShowDetail) {
-    $.ajax({
-      url: `${this.baseUrl}shows/${id}`,
-      type: 'GET',
-      success: response => displayShowDetail(response)
-    });
-  }
-
-  getMovieById(id, displayMovieDetail) {
-    $.ajax({
-      url: `${this.baseUrl}movies/${id}`,
-      type: 'GET',
-      success: response => displayMovieDetail(response)
-    });
-  }
-
-  getSeasonById(showId, seasonId, createEpisodeList) {
-    $.ajax({
-      url: `${this.baseUrl}shows/${showId}/season/${seasonId}`,
-      type: 'GET',
-      success: response => createEpisodeList(response)
-    });
-  }
-}
+document.addEventListener("DOMContentLoaded", () => {
+  const main = new Main();
+  chrome.storage.local.get(["search", "type"], data => {
+    data.type === "movie" ?
+      main.movieHandler.searchForMovie(data.search) :
+      main.showHandler.searchForShow(data.search);
+  });
+});
