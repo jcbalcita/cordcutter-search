@@ -4,8 +4,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
   chrome.storage.local.get(["search", "type"], data => {
     data.type === "movie" ?
-      main.movieHandler.apiCaller.searchForMovie(data.search) :
-      main.showHanlder.apiCaller.searchForShow(data.search);
+      main.movieHandler.apiCaller.searchForMovie(data.search, main.movieHandler.processSearchResults) :
+      main.showHandler.apiCaller.searchForShow(data.search, main.showHandler.processSearchResults);
   });
 });
 
@@ -19,42 +19,7 @@ class Main {
 class MediaHandler {
   constructor(apiCaller) {
     this.apiCaller = apiCaller;
-  }
-
-  processSearchResults(results, type) {
-    $("#loading").empty();
-    if (results.length === 0) {
-      $("#results").text("No results found.");
-      return;
-    }
-    results.forEach(item => this.appendResultItem(item, type));
-  }
-
-  appendResultItem(item, type) {
-    const image = $("<img/>", {"class": "square"});
-    const title = $("<span/>", {"class": "title right"});
-    const listItem = $("<a/>", {
-      "class": "collection-item avatar list-item"
-    });
-
-    if (type === "movie") {
-      image.attr("src", item.poster_120x171);
-      title.text(`${item.title} (${item.release_year})`);
-      listItem.click(() => {
-        $("#initial-results").text("")
-        this.apiCaller.getMovieById(item.id);
-      });
-    } else if (type === "show") {
-      image.attr("src", item.artwork_208x117);
-      title.text(item.title);
-      listItem.click(() => {
-        $("#initial-results").text("")
-        this.apiCaller.getShowById(item.id);
-      });
-    }
-
-    listItem.append(image, title);
-    $("#initial-results").append(listItem);
+    this.processSearchResults = this.processSearchResults.bind(this);
   }
 
   addTitle(title, year) {
@@ -86,6 +51,7 @@ class MediaHandler {
 class MovieHandler extends MediaHandler {
   constructor(apiCaller) {
     super(apiCaller);
+    this.displayMovieDetail = this.displayMovieDetail.bind(this);
     this.sourceTypes = {
       "free": "Free:",
       "sub": "Subscription:",
@@ -93,6 +59,36 @@ class MovieHandler extends MediaHandler {
       "purchase": "Purchase:"
     };
     this.hasLogo = ["Netflix", "Amazon Prime", "Hulu"];
+  }
+
+  processSearchResults(results, type) {
+    $("#loading").empty();
+    if (results.length === 0) {
+      $("#results").text("No results found.");
+      return;
+    }
+    results.forEach(item => this.appendResultItem(item, type));
+  }
+
+  appendResultItem(item, type) {
+    const image = $("<img/>", {
+      "class": "square",
+      "src": item.poster_120x171
+    });
+    const title = $("<span/>", {
+      "class": "title right",
+      text: `${item.title} (${item.release_year})`
+    });
+    const listItem = $("<a/>", {
+      "class": "collection-item avatar list-item",
+      onclick: () => {
+        $("#initial-results").text("")
+        this.apiCaller.getMovieById(item.id, this.displayMovieDetail);
+      }
+    });
+
+    listItem.append(image, title);
+    $("#initial-results").append(listItem);
   }
 
   displayMovieDetail(movie) {
@@ -104,10 +100,8 @@ class MovieHandler extends MediaHandler {
       return;
     }
 
-    this.addMovieSources(movie.sources.free, "free");
-    this.addMovieSources(movie.sources.subscription, "sub");
-    this.addMovieSources(movie.sources.tv_everywhere, "tve");
-    this.addMovieSources(movie.sources.purchase, "purchase");
+    const sourceTypes = Object.keys(movie.sources);
+    sourceTypes.forEach(type => this.addMovieSources(movie.sources[type], type))
   }
 
   addMovieDisplay(display) {
@@ -165,12 +159,44 @@ class MovieHandler extends MediaHandler {
 class ShowHandler extends MediaHandler {
   constructor(apiCaller) {
     super(apiCaller);
+    this.displayShowDetail = this.displayShowDetail.bind(this);
+    this.createEpisodeList = this.createSeasonList.bind(this);
     this.sourceTypes = {
       "free": "(Free)",
       "subscription": "(Subscription)",
       "tv_everywhere": "(TV Everywhere)",
     }
   }
+
+  processSearchResults(results, type) {
+    $("#loading").empty();
+    if (results.length === 0) {
+      $("#results").text("No results found.");
+      return;
+    }
+    results.forEach(item => this.appendResultItem(item, type));
+  }
+
+  appendResultItem(item, type) {
+    const image = $("<img/>", {
+      "class": "square",
+      "src": item.artwork_208x117
+    });
+    const title = $("<span/>", {
+      "class": "title right",
+      text: item.title
+    });
+    const listItem = $("<a/>", {
+      "class": "collection-item avatar list-item",
+      onclick: () => {
+        $("#initial-results").text("")
+        this.apiCaller.getShowById(item.id);
+      }
+    });
+
+    listItem.append(image, title);
+    $("#initial-results").append(listItem);
+}
 
   displayShowDetail(show) {
     this.addShowDisplay(show.display);
@@ -215,7 +241,7 @@ class ShowHandler extends MediaHandler {
       "class": "chip blue",
       click: () => {
         $("#episode-list").text("");
-        this.apiCaller.getSeasonById(showId, seasonNum)
+        this.apiCaller.getSeasonById(showId, seasonNum, this.createEpisodeList)
       }
     });
     $("#season-list").append(div);
@@ -269,54 +295,54 @@ class ApiCaller {
     this.baseUrl = "http://wwww.cordcutter.io/api/";
   }
 
-  searchForShow() {
+  searchForShow(searchString, processSearchResults) {
     $("#loading").text("Loading...");
     $.ajax({
       url: `${this.baseUrl}shows?search_string=${searchString}`,
       type: 'GET',
-      success: response => this.processSearchResults(response, "show")
+      success: response => processSearchResults(response, "show")
     });
   }
 
-  searchForMovie(searchString) {
+  searchForMovie(searchString, processSearchResults) {
     $("#loading").text("Loading...");
     $.ajax({
       url: `${this.baseUrl}movies?search_string=${searchString}`,
       type: 'GET',
-      success: response => this.processSearchResults(response, "movie")
+      success: response => processSearchResults(response, "movie")
     });
   }
 
-  function searchForMovie(searchString) {
+  searchForMovie(searchString, processSearchResults) {
     $("#loading").text("Loading...");
     $.ajax({
       url: `${this.baseUrl}movies?search_string=${searchString}`,
       type: 'GET',
-      success: response => this.processSearchResults(response, "movie")
+      success: response => processSearchResults(response, "movie")
     });
   }
 
-  getShowById(id) {
+  getShowById(id, displayShowDetail) {
     $.ajax({
       url: `${this.baseUrl}shows/${id}`,
       type: 'GET',
-      success: response => this.displayShowDetail(response)
+      success: response => displayShowDetail(response)
     });
   }
 
-  getMovieById(id) {
+  getMovieById(id, displayMovieDetail) {
     $.ajax({
       url: `${this.baseUrl}movies/${id}`,
       type: 'GET',
-      success: response => this.displayMovieDetail(response)
+      success: response => displayMovieDetail(response)
     });
   }
 
-  getSeasonById(showId, seasonId) {
+  getSeasonById(showId, seasonId, createEpisodeList) {
     $.ajax({
       url: `${this.baseUrl}shows/${showId}/season/${seasonId}`,
       type: 'GET',
-      success: response => this.createEpisodeList(response)
+      success: response => createEpisodeList(response)
     });
   }
 }
