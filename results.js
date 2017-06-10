@@ -1,14 +1,15 @@
 document.addEventListener("DOMContentLoaded", () => {
   const apiCaller = new ApiCaller();
-  const results = new Results(apiCaller);
+  const main = new Main(apiCaller);
 
   chrome.storage.local.get(["search", "type"], data => {
     data.type === "movie" ?
-      results.movieHandler.searchForMovie(data.search) : results.showHanlder.searchForShow(data.search);
+      main.movieHandler.apiCaller.searchForMovie(data.search) :
+      main.showHanlder.apiCaller.searchForShow(data.search);
   });
 });
 
-class Results {
+class Main {
   constructor(apiCaller) {
     this.movieHandler = new MovieHandler(apiCaller);
     this.showHandler = new ShowHandler(apiCaller);
@@ -82,7 +83,7 @@ class MediaHandler {
   }
 }
 
-class MovieHandler extends Media {
+class MovieHandler extends MediaHandler {
   constructor(apiCaller) {
     super(apiCaller);
     this.sourceTypes = {
@@ -98,7 +99,7 @@ class MovieHandler extends Media {
     this.addMovieDisplay(movie.display);
     this.addMovieSources(movie.sources);
 
-    if (noSources(movie)) {
+    if (this.noSources(movie)) {
       $("#sources").text("We were unable to find any streams for this movie.");
       return;
     }
@@ -163,7 +164,7 @@ class MovieHandler extends Media {
 
 class ShowHandler extends MediaHandler {
   constructor(apiCaller) {
-    super(props);
+    super(apiCaller);
     this.sourceTypes = {
       "free": "(Free)",
       "subscription": "(Subscription)",
