@@ -78,8 +78,8 @@ class MediaHandler {
 }
 
 class MovieHandler extends MediaHandler {
-  constructor(apiCaller) {
-    super(apiCaller);
+  constructor() {
+    super();
     this.sourceTypes = {
       "free": "Free:",
       "subscription": "Subscription:",
