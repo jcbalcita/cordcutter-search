@@ -5,14 +5,10 @@ class Main {
   }
 }
 
-/*
-****************************************
-HANDLER SUPER CLASS
-****************************************
-*/
+// ------------------------------------------------------------------
 class MediaHandler {
   constructor() {
-    this.baseUrl = "http://localhost:4000/api/";
+    this.baseUrl = "http://www.cordcutter.io/api/";
   }
 
   addTitle(title, year) {
@@ -82,11 +78,7 @@ class MediaHandler {
   }
 }
 
-/*
-****************************************
-MOVIE HANDLER
-****************************************
-*/
+// ------------------------------------------------------------------
 class MovieHandler extends MediaHandler {
   constructor() {
     super();
@@ -181,11 +173,7 @@ class MovieHandler extends MediaHandler {
   }
 }
 
-/*
-****************************************
-TV SHOW HANDLER
-****************************************
-*/
+// ------------------------------------------------------------------
 class ShowHandler extends MediaHandler {
   constructor() {
     super();
@@ -258,7 +246,8 @@ class ShowHandler extends MediaHandler {
   }
 
   appendGeneralSource(source) {
-    const type = source.type === "tv_everywhere" ? "Cable/Dish Login Required" : source.type
+    const type = source.type === "tv_everywhere" ?
+      "Cable/Dish Login Required" : source.type
     const p = $("<p/>", {
       html: `${source.display_name.bold()}  (${type})`
     });
@@ -308,7 +297,8 @@ class ShowHandler extends MediaHandler {
     if (sources.length === 0) { return; }
 
     sources.forEach(source => {
-      let titleType = type === "purchase" ? `$${source.formats[0].price}` : this.sourceTypes[type]
+      let titleType = type === "purchase" ?
+        `$${source.formats[0].price}` : this.sourceTypes[type]
       const link = $("<a/>", {
         "href": source.link,
         text: `${source.display_name} ${titleType}`,
@@ -319,11 +309,7 @@ class ShowHandler extends MediaHandler {
   }
 }
 
-/*
-****************************************
-MAKE IT SO
-****************************************
-*/
+// ------------------------------------------------------------------
 document.addEventListener("DOMContentLoaded", () => {
   const main = new Main();
   chrome.storage.local.get(["search", "type"], data => {
