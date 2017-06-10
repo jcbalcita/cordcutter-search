@@ -5,6 +5,11 @@ class Main {
   }
 }
 
+/*
+****************************************
+HANDLER SUPER CLASS
+****************************************
+*/
 class MediaHandler {
   constructor() {
     this.baseUrl = "http://localhost:4000/api/";
@@ -77,6 +82,11 @@ class MediaHandler {
   }
 }
 
+/*
+****************************************
+MOVIE HANDLER
+****************************************
+*/
 class MovieHandler extends MediaHandler {
   constructor() {
     super();
@@ -171,7 +181,11 @@ class MovieHandler extends MediaHandler {
   }
 }
 
-
+/*
+****************************************
+TV SHOW HANDLER
+****************************************
+*/
 class ShowHandler extends MediaHandler {
   constructor() {
     super();
@@ -305,6 +319,11 @@ class ShowHandler extends MediaHandler {
   }
 }
 
+/*
+****************************************
+MAKE IT SO
+****************************************
+*/
 document.addEventListener("DOMContentLoaded", () => {
   const main = new Main();
   chrome.storage.local.get(["search", "type"], data => {
