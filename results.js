@@ -11,6 +11,15 @@ class MediaHandler {
     this.baseUrl = "http://www.cordcutter.io/api/";
   }
 
+  processSearchResults(results) {
+    $("#loading").empty();
+    if (results.length === 0) {
+      $("#results").text("No results found.");
+      return;
+    }
+    results.forEach(item => this.appendResultItem(item));
+  }
+
   addTitle(title, year) {
     const yearString = year.toString();
     const h4 = $("<h4/>", {
@@ -88,15 +97,6 @@ class MovieHandler extends MediaHandler {
       "tv_everywhere": "TV Everywhere:",
       "purchase": "Purchase:"
     };
-  }
-
-  processSearchResults(results) {
-    $("#loading").empty();
-    if (results.length === 0) {
-      $("#results").text("No results found.");
-      return;
-    }
-    results.forEach(item => this.appendResultItem(item));
   }
 
   appendResultItem(item) {
@@ -184,15 +184,6 @@ class ShowHandler extends MediaHandler {
     }
   }
 
-  processSearchResults(results) {
-    $("#loading").empty();
-    if (results.length === 0) {
-      $("#results").text("No results found.");
-      return;
-    }
-    results.forEach(item => this.appendResultItem(item));
-  }
-
   appendResultItem(item) {
     const image = $("<img/>", {
       "class": "square",
@@ -208,7 +199,7 @@ class ShowHandler extends MediaHandler {
 
     listItem.click(() => {
       $("#initial-results").text("")
-      this.getShowById(item.id, this.displayShowDetail.bind(this));
+      this.getShowById(item.id);
     });
 
     listItem.append(image, title);
@@ -219,7 +210,6 @@ class ShowHandler extends MediaHandler {
     this.addShowDisplay(show.display);
     this.addGeneralContent(show.content);
     this.createSeasonList(show.id, show.seasons);
-    console.log("season 1");
   }
 
   addShowDisplay(display) {
@@ -260,7 +250,7 @@ class ShowHandler extends MediaHandler {
       "class": "chip blue",
       click: () => {
         $("#episode-list").text("");
-        this.getSeasonById(showId, seasonNum, this.createEpisodeList)
+        this.getSeasonById(showId, seasonNum)
       }
     });
     $("#season-list").append(div);
