@@ -160,7 +160,7 @@ class MovieHandler extends MediaHandler {
 
     a.text(source.display_name);
     listItem.append(a);
-    sourceList.append(a);
+    sourceList.append(listItem);
   }
 
   createSourceList(type) {
