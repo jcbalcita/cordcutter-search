@@ -1,3 +1,6 @@
+**DEFUNCT**
+As with Cordcutter API, this is now defunct because the once-free API that I used is now $1000/month. Bummer!
+
 # Cordcutter Search
 
 A Chrome extension that allows users, via the [GuideBox API](http://www.guidebox.com), to find out if a show or movie is available for licensed streaming on the web.
